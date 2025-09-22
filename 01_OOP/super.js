@@ -30,3 +30,10 @@ class ColorMoodTriangle extends ColorTriangle {
     this.mood = mood;
   }
 }
+
+class HugeTriangle extends ColorMoodTriangle {
+  constructor(a, b, color, mood, factor) {
+    super(a * factor, b * factor, color, mood);
+    this.factor = factor;
+  }
+}
