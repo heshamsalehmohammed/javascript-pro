@@ -393,3 +393,75 @@ n(); // normal: undefined  (lost its "this")
 a(); // arrow: I am from Outer (still remembers outer's this!)
 
 */
+
+
+
+
+/* 
+why the value of this of isolated(detached) method defined in class differ from isolated method defined in object?
+
+Classes automatically run in strict mode, so this in a detached class method is always undefined
+Objects are not strict by default, so in sloppy mode a detached object method will use the global object (window) instead of undefined
+That’s why you might see a difference
+
+
+
+*/
+
+
+
+/* 
+
+ways to force setting "this" in a method (call, apply, bind)
+
+call → runs now, arguments listed normally
+apply → runs now, arguments given in an array
+bind → does not run now, makes a new function with this locked forever
+
+function show() {
+  console.log(this.name);
+}
+
+const obj1 = { name: "Ali" };
+const obj2 = { name: "Sara" };
+
+const bound1 = show.bind(obj1);
+const bound2 = show.bind(obj2);
+
+show.call(obj2);   // Sara   (original can still be rebound)
+bound1.call(obj2); // Ali    (ignored, bound1 is locked to obj1)
+bound2.call(obj1); // Sara   (ignored, bound2 is locked to obj2)
+
+----------------------------
+
+function show() {
+  console.log(this.name);
+}
+
+const obj1 = { name: "Ali" };
+const obj2 = { name: "Sara" };
+
+const result = show.bind(obj1).bind(obj2);
+
+result(); // ??? // Ali - still bound to obj1, second bind is ignored
+
+
+
+
+*/
+
+
+/* 
+
+Event listeners handlers or callback and "this"
+In event listeners, this refers to the element that received the event  
+
+Timers and "this"
+In timer callbacks (setTimeout, setInterval), this is undefined in strict mode or the global object in sloppy mode. To preserve this, use an arrow function or bind.
+
+Callback (map, filter, etc) functions and "this"
+When passing methods as callbacks, this can be lost. Use bind or arrow functions to maintain the correct this context.
+
+
+*/
+
