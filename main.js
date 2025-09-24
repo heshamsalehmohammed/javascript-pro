@@ -140,7 +140,170 @@ kitty.speak(); // Meow
 
 
 
+
+
+/* 
+
+getter
+A special method that lets you access a property value like it were a normal field but the value is actually computed or returned from a function It is defined with the keyword get
+
+class Person {
+  constructor(firstName, lastName) {
+    this.firstName = firstName;
+    this.lastName = lastName;
+  }
+
+  get fullName() {
+    return `${this.firstName} ${this.lastName}`;
+  }
+}
+
+const p = new Person("Ali", "Saleh");
+console.log(p.fullName); // Ali Saleh (getter is called like a property)
+
+
+setter
+A special method that lets you assign a property value like it were a normal field but behind the scenes the function runs and handles the assignment or validation It is defined with the keyword set
+
+class Person {
+  constructor(name) {
+    this._name = name; // use _ to avoid recursion with the setter
+  }
+
+  get name() {
+    return this._name;
+  }
+
+  set name(newName) {
+    if (newName.length < 3) {
+      throw new Error("Name too short");
+    }
+    this._name = newName;
+  }
+}
+
+const p = new Person("Ali");
+console.log(p.name); // Ali (getter called)
+p.name = "Omar";     // setter called
+console.log(p.name); // Omar
+
+*/
+
+
+
+
+
+/* 
+
+
+Public fields and methods
+
+Definition
+Public fields and methods can be accessed from anywhere (inside the class, outside the class, or by instances).
+
+Syntax
+They are written normally without any special prefix.
+
+Example
+
+class Person {
+  name; // public field
+
+  constructor(name) {
+    this.name = name;
+  }
+
+  greet() { // public method
+    console.log(`Hello, I am ${this.name}`);
+  }
+}
+
+const p = new Person("Ali");
+console.log(p.name); // Ali (accessible)
+p.greet();           // Hello, I am Ali
+
+Private fields and methods
+
+Definition
+Private fields and methods are only accessible inside the class where they are defined. They cannot be accessed directly from outside.
+
+Syntax
+They are prefixed with #.
+
+Example
+
+class BankAccount {
+  #balance = 0; // private field
+
+  constructor(owner) {
+    this.owner = owner;
+  }
+
+  deposit(amount) { // public method
+    this.#increaseBalance(amount);
+  }
+
+  #increaseBalance(amount) { // private method
+    this.#balance += amount;
+  }
+
+  getBalance() {
+    return this.#balance;
+  }
+}
+
+const account = new BankAccount("Omar");
+account.deposit(100);
+console.log(account.getBalance()); // 100
+console.log(account.#balance);     // ❌ SyntaxError (cannot access private field)
+
+*/
+
+
+
+
+/* 
+
+static initialization blocks 
+
+
+class MyClass {
+  static myStaticProperty;
+  
+  static {
+    // This block runs once when the class is defined
+    MyClass.myStaticProperty = "Initialized Value";
+    console.log("Static block executed");
+  }
+}
+
+
+the block runs once when the class is first evaluated, allowing you to set up static properties or perform one-time setup tasks for the class
+it doesnt run when instances are created
+
+
+
+a static block is a special block inside a class marked with static { ... }
+
+it runs once when the class is evaluated (loaded)
+it can initialize or compute values for static properties
+it can contain any code (loops, if statements, function calls, etc)
+it has access to this (refers to the class itself)
+
+multiple blocks
+
+you can declare more than one static block in the same class
+they run in order of appearance
+
+
+
+*/
+
  /* 
+
+
+
+ 
  
  the left of the dot rule in JavaScript is a simple way to remember what this refers to
 
