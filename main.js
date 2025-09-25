@@ -465,3 +465,335 @@ When passing methods as callbacks, this can be lost. Use bind or arrow functions
 
 */
 
+/* 
+
+new Array()
+new Object()
+new Dog("kiki",1.5)
+
+
+the new keyword
+When you use new with a function, it does the following:
+
+1.Creates a blank object in memory
+2.Links the new object’s internal prototype (__proto__) to the constructor’s .prototype property
+3.Binds "this" inside the constructor to that new object
+4.Executes the constructor function (passing any arguments you supplied)
+5.Returns the newly created object (unless the constructor explicitly returns another object)
+
+
+
+constructor function => function is used to create object in JS
+function Dog(name, age){
+   this.name = name;
+   this.age = age;
+}
+
+Dog("kiki",1.5) => gets undefined , this refers to window or global object
+new Dog("kiki",1.5) => creates a new object with name and age properties {name: "kiki", age: 1.5} and this refers to the object 
+
+
+then the keyword this 
+create new blank object in the memory 
+(create link to the object's prototype)
+links the new objects __proto__ to the constructors .prototype property 
+bind this to the new object 
+execute the constructor function 
+returns the newly created object 
+
+*/
+
+
+
+
+/* 
+
+1 Method on the prototype
+function Dog(name, age) {
+  this.name = name
+  this.age = age
+}
+Dog.prototype.bark = function() {
+  return `${this.name} says woof`
+}
+
+const d1 = new Dog("kiki", 1.5)
+const d2 = new Dog("koko", 2)
+
+
+bark lives once on Dog.prototype
+
+Every instance (d1, d2) shares the same single function object
+
+More memory efficient, better for performance when many instances are created
+
+Typical OOP pattern in JS
+
+2 Method inside constructor
+function Dog(name, age) {
+  this.name = name
+  this.age = age
+  this.bark = function() {
+    return `${this.name} says woof`
+  }
+}
+
+const d1 = new Dog("kiki", 1.5)
+const d2 = new Dog("koko", 2)
+
+
+bark is recreated separately for each new instance
+
+Each dog has its own copy of the function in memory
+
+Less efficient if you create many objects
+
+But lets you have per-instance variations (you could change one dog’s bark without affecting others)
+
+
+---------------------------
+
+When you write a class like this
+
+class Dog {
+  constructor(name, age) {
+    this.name = name
+    this.age = age
+  }
+
+  bark() {
+    return `${this.name} says woof`
+  }
+}
+
+
+What JavaScript does under the hood is very similar to this constructor-function style
+
+function Dog(name, age) {
+  this.name = name
+  this.age = age
+}
+Dog.prototype.bark = function() {
+  return `${this.name} says woof`
+}
+
+Key points
+
+Class methods (like bark) are automatically placed on Dog.prototype, not copied into each instance
+
+They are also non-enumerable by default (won’t show in for...in loops)
+
+The constructor inside the class is just a special method that becomes the function body of the class constructor
+
+So classes are really syntactic sugar over constructor functions plus prototype assignments
+
+*/
+
+
+
+
+
+/* 
+
+In “old JS” (before class syntax in ES2015) you had to wire inheritance manually with constructor functions and prototypes
+
+Here’s the common pattern
+
+1 Base constructor
+function Animal(name) {
+  this.name = name
+}
+
+Animal.prototype.eat = function() {
+  return `${this.name} is eating`
+}
+
+2 Child constructor
+function Dog(name, breed) {
+  // call parent constructor to initialize properties
+  Animal.call(this, name) 
+  this.breed = breed
+}
+
+3 Link prototypes
+Dog.prototype = Object.create(Animal.prototype) // inherit methods
+Dog.prototype.constructor = Dog // fix constructor reference
+
+//////////////////////////
+
+NOTE
+
+If you do
+Dog.prototype = Animal.prototype
+
+
+Both Dog and Animal now share the exact same prototype object
+Any change you make to Dog.prototype also changes Animal.prototype (because they’re the same reference)
+That breaks the idea of inheritance — you don’t want the child class polluting the parent
+
+Correct way
+Dog.prototype = Object.create(Animal.prototype)
+
+
+Creates a new empty object whose internal [[Prototype]] points to Animal.prototype
+So Dog.prototype inherits from Animal.prototype instead of being the same object
+You can safely add dog-specific methods without touching the parent
+
+
+
+
+/////////////////////
+
+4 Add child-specific methods
+Dog.prototype.bark = function() {
+  return `${this.name} says woof`
+}
+
+5 Usage
+const d1 = new Dog("kiki", "husky")
+console.log(d1.eat())  // kiki is eating  (from Animal)
+console.log(d1.bark()) // kiki says woof  (from Dog)
+
+
+
+
+*/
+
+
+
+
+
+/* 
+
+You can set the prototype of a plain object literal in a couple of ways
+
+1 Using Object.setPrototypeOf
+const animal = {
+  eat() { return "eating" }
+}
+
+const dog = {
+  bark() { return "woof" }
+}
+
+Object.setPrototypeOf(dog, animal)
+
+console.log(dog.bark()) // woof
+console.log(dog.eat())  // eating (inherited)
+
+2 Using __proto__ inside an object literal (old but still works)
+const animal = {
+  eat() { return "eating" }
+}
+
+const dog = {
+  __proto__: animal,
+  bark() { return "woof" }
+}
+
+console.log(dog.eat()) // eating
+
+3 Using Object.create directly
+const animal = {
+  eat() { return "eating" }
+}
+
+const dog = Object.create(animal, {
+  bark: {
+    value: function() { return "woof" }
+  }
+})
+
+console.log(dog.eat()) // eating
+
+
+
+
+*/
+
+
+
+
+
+/* 
+
+The prototype chain is how JavaScript resolves properties and methods when you access them on an object
+
+How it works
+When you try to read a property (obj.prop)
+JS first looks for prop directly on obj
+If not found, it looks at obj.__proto__ (same as Object.getPrototypeOf(obj))
+If still not found, it keeps walking “up” the chain to the prototype’s prototype
+This continues until it reaches Object.prototype
+If not found there, result is undefined
+
+*/
+
+
+/* 
+
+?? prototypes are just objects where shared functionality lives 
+
+
+*/
+
+
+
+
+
+/* 
+
+prototype
+
+A property that exists only on constructor functions / classes
+It’s an object used as a template for new instances created with new
+Any methods you want all instances to share should be placed on prototype
+
+function Dog(name) {
+  this.name = name
+}
+
+Dog.prototype.bark = function() {
+  return `${this.name} says woof`
+}
+
+const d1 = new Dog("kiki")
+console.log(d1.bark()) // woof
+
+
+Here Dog.prototype is where bark lives
+
+__proto__
+
+A property that exists on every object instance
+It’s a reference to the object’s internal prototype (i.e. the constructor’s prototype)
+Used for lookup when you access properties
+
+const d1 = new Dog("kiki")
+
+console.log(d1.__proto__ === Dog.prototype) // true
+
+
+So __proto__ connects an object to the prototype chain
+
+Quick analogy
+prototype = blueprint (defined on constructor)
+__proto__ = actual link that each object carries to its blueprint
+
+
+*/
+
+
+
+
+/* 
+
+useful methods handling prototypes 
+
+Object.create(prototype1,initialObj1)
+Object.getPrototypeOf(obj)
+Object.setPrototypeOf(obj1,prototype1)
+obj1.isPrototypeOf(obj2)
+
+
+*/
