@@ -797,3 +797,91 @@ obj1.isPrototypeOf(obj2)
 
 
 */
+
+
+/* 
+callback is simply a function that you pass into another function 
+so that it can be called later when some work is finished
+- functional programming patterns (filter, map, reducer)
+- event driven programming (events handlers)
+- asynchronous programming (timers, promises, async/await)
+
+
+*/
+
+
+/* 
+javascript itself is single threaded because it runs on the event loop model
+
+but it achieves concurrency through
+async callbacks / promises / async await → non blocking code on the same thread
+web apis (like setTimeout fetch etc) handled by the browser or nodejs runtime
+web workers → allow true multithreading by running code in separate background threads with message passing
+*/
+
+
+/* 
+single thread concurrency
+js has one call stack (the main thread)
+when you do setTimeout, fetch, or async i/o the heavy work is passed to browser or node runtime apis (not js itself)
+when that finishes it pushes the callback back into the event queue
+the event loop checks if the call stack is free and executes the callback
+so all js code still runs on the single main thread
+
+
+
+
+real multithreading
+
+this is when multiple threads of execution run truly in parallel on different cpu cores
+js cannot do this with callbacks alone
+only web workers (browser) or worker_threads (node) give real multithreading
+each worker has its own isolated js engine instance and runs on another os thread
+
+so
+
+callbacks promises async/await → concurrency on one thread (non-blocking)
+web workers / worker_threads → true multithreading
+
+
+*/
+
+
+
+/* 
+
+Callback hell (also called the pyramid of doom) happens in JavaScript when you have many nested callbacks, 
+making the code deeply indented, messy, and hard to maintain or debug.
+
+
+Each async function depends on the result of the previous one.
+The nesting creates a pyramid shape with many }) at the end.
+Hard to read, test, and handle errors.
+
+Callback hell = too many nested callbacks
+Solutions: named functions, Promises, or best → async/await  
+
+// NOTE>> await keyword pauses the surrounding async function, not the whole JS engine
+
+*/
+
+
+
+
+/* 
+PROMISES
+
+Promises are the modern way to handle asynchronous operations
+a Promise in JavaScript is an object that represents the eventual result of an asynchronous operation
+
+definition
+it acts like a placeholder for a value that will be available later (success or failure)
+[[one time guarantee for a future value]]
+it can be in one of three states
+
+pending → the async work has not finished yet
+fulfilled → the work finished successfully, a value is available
+rejected → the work failed, an error reason is available
+
+
+*/
