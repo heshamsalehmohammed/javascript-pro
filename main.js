@@ -885,3 +885,78 @@ rejected → the work failed, an error reason is available
 
 
 */
+
+
+/* 
+
+Promise chaining means linking multiple asynchronous operations one after the other using .then() 
+so that the output of one promise becomes the input for the next.
+
+
+each .then() returns a new promise
+if you return a value → it is passed to the next .then()
+if you return another promise → the next .then() waits for it to resolve
+
+promise chaining = sequential async flow
+
+
+*/
+
+
+
+
+/* 
+
+async/await is modern JavaScript syntax (introduced in ES2017) built on top of Promises.
+It makes asynchronous code look and behave more like synchronous code, improving readability.
+
+definition
+async before a function means the function will always return a Promise
+await pauses execution inside an async function until the awaited Promise resolves (or rejects)
+
+pros
+Code looks sequential and easier to read
+Error handling uses normal try/catch
+Still non-blocking (event loop runs while waiting)
+
+async/await = syntactic sugar over Promises
+async makes a function return a Promise
+await pauses only the async function until the Promise settles
+
+*/
+
+
+/* 
+
+if the function is marked async, it always returns a Promise
+If you return a normal value, it gets wrapped in a resolved Promise
+async function fetchData() {
+  return "data"
+} 
+// equivalent to
+async function fetchData() {
+  return Promise.resolve("data")
+}
+
+
+*/
+
+
+
+
+
+/* 
+ways to return a Promise
+
+
+
+async function → auto promise
+new Promise → manual
+Promise.resolve / Promise.reject → quick
+return from built-in APIs like fetch, fs.promises, etc
+combinators (Promise.all, race, etc)
+.then() → always returns a promise
+async generators
+
+
+*/
