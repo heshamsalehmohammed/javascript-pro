@@ -1,48 +1,48 @@
 // creating objects
 
 // 1. Object literal - most common way
-const o1 = {}
+const o1 = {};
 
 // 2. Object constructor
-const o2 = new Object()
+const o2 = new Object();
 
 // 3. Object.create() - creates object with specified prototype
-const o3 = Object.create({})  // the arg is the prototype of the new object
+const o3 = Object.create({}); // the arg is the prototype of the new object
 
 // 4. Using a class (ES6+)
 class MyClass {
-    constructor() {
-        this.prop = 'value'
-    }
+  constructor() {
+    this.prop = "value";
+  }
 }
-const o4 = new MyClass()
+const o4 = new MyClass();
 
 // 5. Using a function constructor (pre-ES6)
 function MyFunc() {
-    this.prop = 'value'
+  this.prop = "value";
 }
-const o5 = new MyFunc()
+const o5 = new MyFunc();
 
 // 6. Using Object.assign() to clone or merge objects
-const o6 = Object.assign({}, { a: 1, b: 2 })
+const o6 = Object.assign({}, { a: 1, b: 2 });
 
 // 7. Using JSON.parse() for deep cloning (from JSON string)
-const o7 = JSON.parse('{"x":10,"y":20}')
+const o7 = JSON.parse('{"x":10,"y":20}');
 
 // 8. Using Object.fromEntries() (ES2019+)
-const o8 = Object.fromEntries([['key', 'value'], ['foo', 'bar']])
+const o8 = Object.fromEntries([
+  ["key", "value"],
+  ["foo", "bar"],
+]);
 
-
-console.log(o1, o2, o3, o4, o5, o6, o7, o8)
+console.log(o1, o2, o3, o4, o5, o6, o7, o8);
 
 // key of object is always a string or a symbol
 
-o1[30] = 30 
-o1["30"] = 50
+o1[30] = 30;
+o1["30"] = 50;
 
-console.log(o1) // { '30': 50 } - keys are always strings
-
-
+console.log(o1); // { '30': 50 } - keys are always strings
 
 //---------------------
 
@@ -126,10 +126,6 @@ kitty.speak(); // Meow
 
 */
 
-
-
-
-
 /*  instance methods are methods that belongs to the object (instance) created from the class
  static method methods belong to the class not the instances (objects) created from the class
 
@@ -137,10 +133,6 @@ kitty.speak(); // Meow
 
  "this" in static refers to the class itself
  "this" in instance methods refers to the instance (object) created from the class */
-
-
-
-
 
 /* 
 
@@ -188,10 +180,6 @@ p.name = "Omar";     // setter called
 console.log(p.name); // Omar
 
 */
-
-
-
-
 
 /* 
 
@@ -259,9 +247,6 @@ console.log(account.#balance);     // ❌ SyntaxError (cannot access private fie
 
 */
 
-
-
-
 /* 
 
 static initialization blocks 
@@ -299,7 +284,7 @@ they run in order of appearance
 
 */
 
- /* 
+/* 
 
 
 
@@ -351,9 +336,6 @@ person.greet.call({ name: "Sara" }); // "Sara"
  
  */
 
-
-
-
 /* 
 
 key difference
@@ -361,7 +343,6 @@ normal function → this is decided every time you call it (who is left of the d
 arrow function → this is locked to whatever it was in the place the arrow was created
 
 */
-
 
 /* 
 
@@ -394,9 +375,6 @@ a(); // arrow: I am from Outer (still remembers outer's this!)
 
 */
 
-
-
-
 /* 
 why the value of this of isolated(detached) method defined in class differ from isolated method defined in object?
 
@@ -407,8 +385,6 @@ That’s why you might see a difference
 
 
 */
-
-
 
 /* 
 
@@ -449,7 +425,6 @@ result(); // ??? // Ali - still bound to obj1, second bind is ignored
 
 
 */
-
 
 /* 
 
@@ -502,9 +477,6 @@ execute the constructor function
 returns the newly created object 
 
 */
-
-
-
 
 /* 
 
@@ -589,10 +561,6 @@ So classes are really syntactic sugar over constructor functions plus prototype 
 
 */
 
-
-
-
-
 /* 
 
 In “old JS” (before class syntax in ES2015) you had to wire inheritance manually with constructor functions and prototypes
@@ -659,10 +627,6 @@ console.log(d1.bark()) // kiki says woof  (from Dog)
 
 */
 
-
-
-
-
 /* 
 
 You can set the prototype of a plain object literal in a couple of ways
@@ -711,10 +675,6 @@ console.log(dog.eat()) // eating
 
 */
 
-
-
-
-
 /* 
 
 The prototype chain is how JavaScript resolves properties and methods when you access them on an object
@@ -729,17 +689,12 @@ If not found there, result is undefined
 
 */
 
-
 /* 
 
 ?? prototypes are just objects where shared functionality lives 
 
 
 */
-
-
-
-
 
 /* 
 
@@ -783,9 +738,6 @@ __proto__ = actual link that each object carries to its blueprint
 
 */
 
-
-
-
 /* 
 
 useful methods handling prototypes 
@@ -798,7 +750,6 @@ obj1.isPrototypeOf(obj2)
 
 */
 
-
 /* 
 callback is simply a function that you pass into another function 
 so that it can be called later when some work is finished
@@ -809,7 +760,6 @@ so that it can be called later when some work is finished
 
 */
 
-
 /* 
 javascript itself is single threaded because it runs on the event loop model
 
@@ -818,7 +768,6 @@ async callbacks / promises / async await → non blocking code on the same threa
 web apis (like setTimeout fetch etc) handled by the browser or nodejs runtime
 web workers → allow true multithreading by running code in separate background threads with message passing
 */
-
 
 /* 
 single thread concurrency
@@ -846,8 +795,6 @@ web workers / worker_threads → true multithreading
 
 */
 
-
-
 /* 
 
 Callback hell (also called the pyramid of doom) happens in JavaScript when you have many nested callbacks, 
@@ -864,9 +811,6 @@ Solutions: named functions, Promises, or best → async/await
 // NOTE>> await keyword pauses the surrounding async function, not the whole JS engine
 
 */
-
-
-
 
 /* 
 PROMISES
@@ -886,7 +830,6 @@ rejected → the work failed, an error reason is available
 
 */
 
-
 /* 
 
 Promise chaining means linking multiple asynchronous operations one after the other using .then() 
@@ -901,9 +844,6 @@ promise chaining = sequential async flow
 
 
 */
-
-
-
 
 /* 
 
@@ -925,7 +865,6 @@ await pauses only the async function until the Promise settles
 
 */
 
-
 /* 
 
 if the function is marked async, it always returns a Promise
@@ -940,10 +879,6 @@ async function fetchData() {
 
 
 */
-
-
-
-
 
 /* 
 ways to return a Promise
@@ -960,3 +895,282 @@ async generators
 
 
 */
+
+/* 
+
+what Promise.resolve(p) does
+if p is already a promise → it returns the same promise untouched
+if p is just a plain value → it wraps it in a resolved promise
+
+*/
+
+/* 
+
+you can chain three fetches in two main styles async/await and promise chaining with .then().catch()
+
+
+with async/await
+async function fetchSequential() {
+  try {
+    const res1 = await fetch("https://api.example.com/step1");
+    const data1 = await res1.json();
+    console.log("first:", data1);
+
+    const res2 = await fetch("https://api.example.com/step2");
+    const data2 = await res2.json();
+    console.log("second:", data2);
+
+    const res3 = await fetch("https://api.example.com/step3");
+    const data3 = await res3.json();
+    console.log("third:", data3);
+
+  } catch (err) {
+    console.error("error:", err);
+  }
+}
+
+fetchSequential();
+
+
+the await keyword pauses each step until the fetch is done
+the try/catch handles any error along the way
+
+
+
+with .then().catch()
+fetch("https://api.example.com/step1")
+  .then(res => res.json())
+  .then(data1 => {
+    console.log("first:", data1);
+    return fetch("https://api.example.com/step2");
+  })
+  .then(res => res.json())
+  .then(data2 => {
+    console.log("second:", data2);
+    return fetch("https://api.example.com/step3");
+  })
+  .then(res => res.json())
+  .then(data3 => {
+    console.log("third:", data3);
+  })
+  .catch(err => {
+    console.error("error:", err);
+  });
+
+
+each .then returns a new promise so the next .then waits for it
+the .catch at the end will capture any error from the whole chain
+
+
+
+by default a single .catch() at the end of the chain will handle errors from anywhere in the chain but you can also handle errors step by step if you want more control
+add .catch() after each fetch
+
+
+fetch("https://api.example.com/step1")
+  .then(res => res.json())
+  .then(data1 => {
+    console.log("first:", data1);
+    return fetch("https://api.example.com/step2");
+  })
+  .catch(err => {
+    console.error("error in step1:", err);
+    // rethrow if you want to stop further steps
+    throw err;
+  })
+  .then(res => res.json())
+  .then(data2 => {
+    console.log("second:", data2);
+    return fetch("https://api.example.com/step3");
+  })
+  .catch(err => {
+    console.error("error in step2:", err);
+    throw err;
+  })
+  .then(res => res.json())
+  .then(data3 => {
+    console.log("third:", data3);
+  })
+  .catch(err => {
+    console.error("error in step3:", err);
+  });
+*/
+
+/* 
+
+Promise combinator methods
+
+
+
+
+
+Promise.all()
+Definition: runs multiple promises in parallel and waits for all to fulfill
+
+Behavior:
+if all succeed → resolves to an array of results in order
+if any one fails → rejects immediately (fail-fast)
+
+Example
+Promise.all([
+  fetch("/a"),
+  fetch("/b"),
+  fetch("/c"),
+])
+  .then(([resA, resB, resC]) => console.log("all done"))
+  .catch(err => console.error("one failed:", err));
+
+
+
+
+
+Promise.allSettled()
+Definition: runs multiple promises in parallel and waits for all to settle
+
+Behavior:
+never fail fast
+returns an array of objects { status: "fulfilled", value } or { status: "rejected", reason }
+
+Example
+Promise.allSettled([
+  fetch("/a"),
+  fetch("/b"),
+  fetch("/bad-url"),
+])
+  .then(results => {
+    results.forEach(r => {
+      if (r.status === "fulfilled") {
+        console.log("ok:", r.value);
+      } else {
+        console.error("error:", r.reason);
+      }
+    });
+  });
+
+
+
+
+
+Promise.any()
+Definition: runs multiple promises in parallel and waits for the first one that fulfills
+
+Behavior:
+resolves with the value of the first fulfilled promise
+ignores rejections unless all reject → then rejects with AggregateError
+
+Example
+Promise.any([
+  fetch("/bad-url"),
+  fetch("/another-bad-url"),
+  fetch("/good"),
+])
+  .then(result => console.log("first success:", result))
+  .catch(err => console.error("all failed:", err)); // AggregateError
+
+
+
+
+Promise.race()
+Definition: runs multiple promises in parallel and settles as soon as the first one settles
+Behavior:
+if the first to finish fulfills → resolves with that value
+if the first to finish rejects → rejects with that error
+
+Example
+Promise.race([
+  fetch("/slow"),
+  fetch("/fast"),
+])
+  .then(result => console.log("winner:", result))
+  .catch(err => console.error("failed fast:", err));
+
+
+
+
+quick comparison
+all → wait for all, fail fast if any rejects
+allSettled → wait for all, always gives you all states
+any → succeed fast, only needs one fulfillment (AggregateError if all fail)
+race → first to settle wins, whether success or error */
+
+const promiseAll = (promises) => {
+  return new Promise((resolve, reject) => {
+    let results = Array(promises.length);
+    let completed = 0;
+
+    promises.forEach((p, index) =>
+      Promise.resolve(p)
+        .then((result) => {
+          results[index] = result;
+          completed++;
+          if (completed === promises.length) {
+            resolve(results);
+          }
+        })
+        .catch((err) => {
+          reject(err);
+        })
+    );
+  });
+};
+
+const promiseAllSetteled = (promises) => {
+  return new Promise((resolve, reject) => {
+    let results = Array(promises.length);
+    let setteled = 0;
+
+    const checkSettling = () => {
+      setteled++;
+      if (setteled === promises.length) {
+        resolve(results);
+      }
+    };
+
+    promises.forEach((p, index) =>
+      Promise.resolve(p)
+        .then((result) => {
+          results[index] = { status: "fulilled", result };
+          checkSettling();
+        })
+        .catch((reason) => {
+          results[index] = { status: " rejected", reason };
+          checkSettling();
+        })
+    );
+  });
+};
+
+
+const promiseRace = (promises) => {
+  return new Promise((resolve, reject) => {
+    promises.forEach((p, index) =>
+      Promise.resolve(p)
+        .then((result) => {
+          resolve(result);
+        })
+        .catch((reason) => {
+          reject(reason);
+        })
+    );
+  });
+};
+
+
+
+const promiseAny = (promises) => {
+  return new Promise((resolve, reject) => {
+    const len = promises.length;
+    const errors = new Array(len);
+    let rejectedCount = 0;
+
+    promises.forEach((p, i) => {
+      Promise.resolve(p).then(resolve, (err) => {
+        errors[i] = err;
+        rejectedCount += 1;
+        if (rejectedCount === len) {
+          reject(new AggregateError(errors, "All promises were rejected"));
+        }
+      });
+    });
+  });
+};
