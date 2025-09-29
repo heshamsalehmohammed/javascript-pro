@@ -1541,3 +1541,63 @@ for (const val of myIterableIterator) {
 
 
 */
+
+
+
+
+/*
+
+var 
+
+scope: function & global scope 
+initialization: not required 
+hoisting: yes (initialized with undefined)
+redeclaration: yes
+reassignment: yes
+
+let 
+scope: block scope
+initialization: required 
+hoisting: yes (not initialized, temporal dead zone TDZ)
+redeclaration: no
+reassignment: yes
+
+const 
+
+scope: block scope
+initialization: required 
+hoisting: yes (not initialized, temporal dead zone TDZ)
+redeclaration: no
+reassignment: no (but object properties can be changed)
+
+*/
+
+/* 
+
+The Temporal Dead Zone (TDZ) means the time between when a variable is hoisted and when it is actually declared/initialized in your code
+Variables declared with let and const are hoisted (JavaScript knows they exist before execution)
+But unlike var, they are not automatically initialized with undefined
+So if you try to access them before the actual line of declaration, you get a ReferenceError 
+
+TDZ = the "forbidden time window" where a variable exists in memory but you cannot use it yet
+
+
+console.log(a)   var a = 10
+console.log(b)   let b = 20
+console.log(c)   const c = 30
+
+|---------- Hoisting ----------|
+|   a = undefined              |
+|   b = (TDZ)                  |
+|   c = (TDZ)                  |
+|------------------------------- Execution ----------------------------|
+| console.log(a) → undefined    |
+| console.log(b) → ReferenceErr |
+| console.log(c) → ReferenceErr |
+| a = 10   | b = 20   | c = 30  |
+
+
+
+
+*/
+
