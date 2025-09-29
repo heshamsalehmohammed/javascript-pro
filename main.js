@@ -1140,7 +1140,6 @@ const promiseAllSetteled = (promises) => {
   });
 };
 
-
 const promiseRace = (promises) => {
   return new Promise((resolve, reject) => {
     promises.forEach((p, index) =>
@@ -1154,8 +1153,6 @@ const promiseRace = (promises) => {
     );
   });
 };
-
-
 
 const promiseAny = (promises) => {
   return new Promise((resolve, reject) => {
@@ -1174,3 +1171,115 @@ const promiseAny = (promises) => {
     });
   });
 };
+
+/* 
+
+isNaN → loose check, coerces values to number first (can mislead)
+Number.isNaN → strict check, only true if the value is literally NaN
+
+isNaN(NaN);        // true
+isNaN("hello");    // true   (string → NaN)
+isNaN(undefined);  // true   (undefined → NaN)
+isNaN("123");      // false  ("123" → 123)
+isNaN(true);       // false  (true → 1)
+
+Number.isNaN(NaN);        // true
+Number.isNaN("hello");    // false (no coercion, just a string)
+Number.isNaN(undefined);  // false
+Number.isNaN("123");      // false
+Number.isNaN(true);       // false
+
+*/
+
+
+
+/* 
+
+generator in JavaScript is a special kind of function that can be paused and resumed, 
+allowing you to produce a sequence of values over time instead of computing them all at once
+
+how to define
+
+declared with an asterisk function*
+use the yield keyword to return values one by one
+calling a generator function does not run it immediately, it returns an iterator object
+you call .next() on that iterator to step through execution
+
+example
+function* numberGen() {
+  yield 1;
+  yield 2;
+  yield 3;
+}
+
+const gen = numberGen();
+
+console.log(gen.next()); // { value: 1, done: false }
+console.log(gen.next()); // { value: 2, done: false }
+console.log(gen.next()); // { value: 3, done: false }
+console.log(gen.next()); // { value: undefined, done: true }
+
+key points
+
+lazy evaluation: values are generated only when requested
+pause/resume: execution “pauses” at yield and continues when .next() is called again
+done flag: tells you when the generator is finished
+
+use cases
+
+creating custom iterators
+managing infinite sequences (like Fibonacci numbers, streams)
+simplifying async workflows (before async/await, people used generators with libraries like co)
+controlling execution flow
+
+
+example 1
+
+
+function* fetchUserFlow() {
+  const user = yield fetch("/api/user").then(res => res.json());
+  console.log("user:", user);
+
+  const posts = yield fetch(`/api/posts?user=${user.id}`).then(res => res.json());
+  console.log("posts:", posts);
+}
+
+// simple runner
+function run(gen) {
+  const iterator = gen();
+
+  function step(nextValue) {
+    const result = iterator.next(nextValue);
+    if (result.done) return;
+    result.value.then(step);
+  }
+
+  step();
+}
+
+run(fetchUserFlow);
+
+
+example 2
+
+function* fibonacci(a = 0, b = 1) {
+  while (true) {
+    yield a;
+    [a, b] = [b, a + b];
+  }
+}
+
+// helper to consume only k values from an infinite generator
+function take(iter, k) {
+  const out = [];
+  for (const v of iter) {
+    out.push(v);
+    if (out.length === k) break;
+  }
+  return out;
+}
+
+console.log(take(fibonacci(), 10)); // [0,1,1,2,3,5,8,13,21,34]
+
+
+*/
