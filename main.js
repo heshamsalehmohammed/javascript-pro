@@ -1601,3 +1601,170 @@ console.log(c)   const c = 30
 
 */
 
+
+/* 
+
+Closures is an ability of a function to remember the variables and functions that are declared in its outer scope 
+— even after that outer scope has finished executing.
+
+
+Key Points
+
+Functions carry scope with them
+Inner functions have access to variables of their outer functions.
+
+Persistent state
+Even if the outer function has returned, the inner function keeps a reference to the outer variables, not a copy.
+
+Private variables
+You can use closures to emulate private state because outside code cannot directly access the enclosed variables.
+
+Memory
+Because closures keep variables “alive,” they can sometimes cause memory leaks if not managed carefully.
+
+
+
+
+Examples
+
+
+
+1. Basic Closure
+function outer() {
+  let counter = 0;
+  function inner() {
+    counter++;
+    return counter;
+  }
+  return inner;
+}
+
+const fn = outer(); 
+console.log(fn()); // 1
+console.log(fn()); // 2
+console.log(fn()); // 3
+
+
+Here, fn is a closure: it remembers counter even though outer has finished executing.
+
+2. Private State
+function createBankAccount(initialBalance) {
+  let balance = initialBalance;
+
+  return {
+    deposit(amount) {
+      balance += amount;
+      return balance;
+    },
+    withdraw(amount) {
+      balance -= amount;
+      return balance;
+    },
+    getBalance() {
+      return balance;
+    }
+  };
+}
+
+const account = createBankAccount(100);
+console.log(account.deposit(50));   // 150
+console.log(account.withdraw(30));  // 120
+console.log(account.getBalance());  // 120
+
+
+balance is not accessible directly → it’s private inside the closure.
+
+3. Closures with Event Handlers
+function setupButton() {
+  let count = 0;
+  document.getElementById("myBtn").addEventListener("click", () => {
+    count++;
+    console.log(`Button clicked ${count} times`);
+  });
+}
+setupButton();
+
+
+Even after setupButton finishes, the event handler keeps count alive.
+
+4. Factory Functions
+function multiplier(factor) {
+  return function(x) {
+    return x * factor;
+  };
+}
+
+const double = multiplier(2);
+const triple = multiplier(3);
+
+console.log(double(5)); // 10
+console.log(triple(5)); // 15
+
+
+Each closure “remembers” its own factor.
+
+
+
+
+
+Use Cases
+
+Data privacy → emulate private variables.
+Function factories → generate functions with preconfigured behavior.
+Callbacks / event handlers → closures capture variables from the environment.
+Memoization → store computed values across calls.
+Module pattern → organize code with encapsulated state.-
+
+*/
+
+
+
+/* 
+
+
+Hoisting in JavaScript is the behavior where variable and function declarations are moved (“hoisted”) to the top of their scope
+(either global scope or function scope) during the compilation phase, before the code is executed.
+
+Key Points
+
+Only declarations are hoisted
+Initializations/assignments are not hoisted.
+Function declarations are fully hoisted
+You can call a function declared with function before it appears in the code.
+
+var is hoisted
+Variables declared with var are hoisted to the top and initialized with undefined.
+
+let and const are hoisted too
+But they are put into the temporal dead zone (TDZ) until the declaration is executed → accessing them before declaration causes a ReferenceError.
+
+Scope matters
+Hoisting works within each function scope and block scope, not across everything globally.
+
+Examples
+1. Function Declaration Hoisting
+sayHi(); // works, prints "Hi!"
+
+function sayHi() {
+  console.log("Hi!");
+}
+
+2. var Hoisting
+console.log(x); // undefined (declaration hoisted, not assignment)
+var x = 5;
+
+3. let / const Hoisting
+console.log(y); // ReferenceError (TDZ)
+let y = 10;
+
+console.log(z); // ReferenceError (TDZ)
+const z = 20;
+
+4. Function Expressions (not hoisted fully)
+greet(); // TypeError: greet is not a function
+var greet = function() {
+  console.log("Hello");
+};
+
+
+*/
