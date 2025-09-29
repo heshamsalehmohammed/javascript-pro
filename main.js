@@ -1195,7 +1195,7 @@ Number.isNaN(true);       // false
 
 /* 
 
-generator in JavaScript is a special kind of function that can be paused and resumed, 
+Generator in JavaScript is a special kind of function that can pause execution at yield expressions and resume later, 
 allowing you to produce a sequence of values over time instead of computing them all at once
 
 how to define
@@ -1313,11 +1313,18 @@ while (!result.done) {
 
 /* 
 
+
 Iterator is an object that defines a sequence and allows you to step through it one item at a time.
 An iterator must implement a method called next(), which returns an object with two properties:
-
 value → the current item in the sequence
 done → a boolean (false if there are more items, true if the sequence is finished)
+
+
+Iterable is an object that implements the @@iterator method, available as [Symbol.iterator]().
+Calling this method must return an iterator object. 
+Iterables can be consumed by language constructs such as 
+for...of, spread syntax (...), array destructuring, and other APIs expecting sequences.
+Examples of built-in iterables: Array, String, Set, Map, TypedArray, and generator objects.
 
 
 
