@@ -1791,3 +1791,56 @@ var greet = function() {
 
 
 */
+
+
+
+
+
+/* 
+
+Special Add Exercise
+Write a function called specialAdd. If you give this function a number, it
+returns a new function to you. If you give this function no arguments, it
+returns the total of all the numbers you've passed to it so far.
+
+Examples:
+specialAdd(); // 0
+specialAdd(1)(2)(); // 3
+specialAdd(2)(8)(5)(1)(); // 16
+
+*/
+
+function specialAdd(init) {
+  if (init === undefined) return 0;
+  return function innerSum(num) {
+    if (num === undefined) return init;
+    init += num;
+    return innerSum;
+  };
+}
+
+
+
+
+/* 
+
+Debouncing is a programming technique used to limit how often a function is executed.
+It ensures that a function runs only after a certain period of time has passed since the last time it was invoked.
+
+Key Points
+
+Used to control rapid events like keypress, resize, scroll, input.
+The function execution is delayed until no new event happens within the wait period.
+Prevents unnecessary computations or API calls.
+Common in search boxes (wait until user stops typing before firing a request).
+
+Example: Basic Debounce
+function debounce(fn, delay) {
+  let timer;
+  return function (...args) {
+    clearTimeout(timer); // reset if called again
+    timer = setTimeout(() => fn.apply(this, args), delay);
+  };
+}
+
+*/
