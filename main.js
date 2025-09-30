@@ -245,6 +245,29 @@ account.deposit(100);
 console.log(account.getBalance()); // 100
 console.log(account.#balance);     // ❌ SyntaxError (cannot access private field)
 
+
+we use private fields and methods to encapsulate internal details of a class, hiding them from outside access. 
+This helps prevent unintended interference and keeps the public interface clean and easy to use.
+old days we used naming conventions like _privateField to indicate something is private 
+but it was just a convention and not enforced by the language
+also we used closures to create private variables but that made it hard to use inheritance and prototypes
+
+
+const counter = (function () {
+  let count = 0;
+  return {
+    increment: function () {
+      return count++;
+    },
+    decrement: function () {
+      return count--;
+    },
+    getCount: function () {
+      return count;
+    },
+  };
+})();
+
 */
 
 /* 
