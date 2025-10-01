@@ -1214,8 +1214,6 @@ Number.isNaN(true);       // false
 
 */
 
-
-
 /* 
 
 Generator in JavaScript is a special kind of function that can pause execution at yield expressions and resume later, 
@@ -1331,8 +1329,6 @@ while (!result.done) {
 
 
 */
-
-
 
 /* 
 
@@ -1450,9 +1446,6 @@ Generators automatically return iterators, making them perfect for building comp
 
 */
 
-
-
-
 /* 
 
 An iterator is an object with .next() that produces a sequence.
@@ -1461,8 +1454,6 @@ In JS, some objects (like generators) are both iterators and iterables.
 
 
 */
-
-
 
 /* 
 
@@ -1490,7 +1481,6 @@ BUT in practice, most built-in iterators in JS are also iterables (they return t
 Example: generator objects, array iterators.
 
 */
-
 
 /* 
 
@@ -1523,8 +1513,6 @@ an iterator → because it has a .next() method (and also .return() and .throw()
 an iterable → because it has a [Symbol.iterator]() method that just returns itself. This is why you can use it in for...of, spread ([...gen()]), destructuring, etc.
 
 */
-
-
 
 /* 
 
@@ -1564,9 +1552,6 @@ for (const val of myIterableIterator) {
 
 
 */
-
-
-
 
 /*
 
@@ -1623,7 +1608,6 @@ console.log(c)   const c = 30
 
 
 */
-
 
 /* 
 
@@ -1740,8 +1724,6 @@ Module pattern → organize code with encapsulated state.-
 
 */
 
-
-
 /* 
 
 
@@ -1792,10 +1774,6 @@ var greet = function() {
 
 */
 
-
-
-
-
 /* 
 
 Special Add Exercise
@@ -1818,9 +1796,6 @@ function specialAdd(init) {
     return innerSum;
   };
 }
-
-
-
 
 /* 
 
