@@ -2184,225 +2184,105 @@ function debounce(fn, delay) {
 */
 
 
+/* 
 
+A Higher-Order Function (HOF) in JavaScript is a function that either 
+Takes one or more functions as arguments, or Returns a function as its result, or both.
 
 
 
+Key Points
 
+Functions are first-class citizens in JavaScript → they can be passed around just like values.
+HOFs allow more abstraction and reusability.
+Very common in functional programming style.
+Built-in methods like map, filter, reduce, forEach are HOFs.
 
 
 
 
+Examples
 
 
 
+1. Function passed as an argument
+function greet(name) {
+  return "Hello, " + name;
+}
 
+function processUserInput(fn) {
+  const name = "Hesham";
+  return fn(name);
+}
 
+console.log(processUserInput(greet)); 
+// "Hello, Hesham"
 
 
 
 
+2. Function returning another function
+function multiplier(factor) {
+  return function (x) {
+    return x * factor;
+  };
+}
 
+const double = multiplier(2);
+console.log(double(5)); // 10
 
 
 
+3. Built-in Array HOFs
+const numbers = [1, 2, 3, 4, 5];
 
+const doubled = numbers.map(n => n * 2); 
+console.log(doubled); // [2, 4, 6, 8, 10]
 
+const evens = numbers.filter(n => n % 2 === 0);
+console.log(evens); // [2, 4]
 
+const sum = numbers.reduce((acc, n) => acc + n, 0);
+console.log(sum); // 15
 
 
 
 
+Use Cases
 
+Code reusability (abstracting repetitive logic).
+Function composition (building bigger logic from small pieces).
+Asynchronous control (e.g., passing callbacks to setTimeout, promises).
+Event handling (pass handler functions).
+Currying/partial application.
 
+*/
 
+/* 
 
+🔥 closures and higher-order functions (HOFs) are deeply connected in JavaScript
 
+Relation
 
+A higher-order function either takes a function as an argument or returns a function.
+When a higher-order function returns a function, that returned function usually closes over (remembers) variables from the outer scope.
+That’s where closures come in — they give the returned function access to the outer function’s variables even after the outer function has finished running.
 
+So:
+👉 Closures are the mechanism.
+👉 Higher-order functions are the design pattern that often relies on closures.
 
+*/
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+function debounce(func, delay) {
+  let timeoutid = null;
+  return function (...args) {
+    clearTimeout(timeoutid);
+    timeoutid = setTimeout(function () {
+      func.apply(this, args);
+    }, delay);
+  };
+}
 
 
 
@@ -2474,6 +2354,33 @@ Throttle = run at intervals.
 
 
 */
+
+
+
+
+
+/* 
+
+throtlling issue with scroll 
+
+pick a small enough throttle interval
+
+if you throttle to ~100–200 ms, the UI is still responsive (5–10 updates per second)
+the user doesn’t perceive lag, because the eye can’t catch gaps shorter than ~100 ms
+
+combine throttle with a final call (trailing edge)
+
+many implementations allow “leading” (run immediately) and “trailing” (run after the last event)
+so when the user finishes scrolling, your function fires one last time and fills the screen
+
+
+
+example using lodash:
+window.addEventListener("scroll", _.throttle(loadMore, 200, { leading: true, trailing: true }));
+
+
+*/
+
 
 
 
