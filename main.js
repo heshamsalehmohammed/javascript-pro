@@ -3094,3 +3094,340 @@ Libraries: Immer.js, Immutable.js
 Immutability = “don’t change the thing, make a new thing.”
 
 */
+
+
+
+
+/* 
+
+Recursion is when a function calls itself (directly or indirectly) in order to solve a problem by breaking it into smaller subproblems.
+
+Key Points
+
+
+Base Case
+A condition that stops the recursion, preventing infinite calls.
+
+Recursive Case
+The part of the function where it calls itself with a smaller/simpler input.
+
+Stack
+Each recursive call is pushed onto the call stack.
+Too many recursive calls without a base case → stack overflow error.
+
+
+
+
+Examples
+1. Factorial (classic recursion)
+function factorial(n) {
+  if (n === 0) return 1;   // base case
+  return n * factorial(n - 1); // recursive case
+}
+
+console.log(factorial(5)); // 120
+
+2. Fibonacci Sequence
+function fibonacci(n) {
+  if (n <= 1) return n;   // base cases: 0 or 1
+  return fibonacci(n - 1) + fibonacci(n - 2);
+}
+
+console.log(fibonacci(5)); // 5
+
+3. Recursion vs Iteration
+// iteration
+function sumIterative(n) {
+  let sum = 0;
+  for (let i = 1; i <= n; i++) sum += i;
+  return sum;
+}
+
+// recursion
+function sumRecursive(n) {
+  if (n === 0) return 0; // base case
+  return n + sumRecursive(n - 1); // recursive case
+}
+
+console.log(sumIterative(5)); // 15
+console.log(sumRecursive(5)); // 15
+
+
+
+
+
+
+Use Cases
+
+Tree and graph traversal (DOM tree, file systems).
+Divide and conquer algorithms (merge sort, quicksort).
+Problems naturally defined in recursive terms (factorials, Fibonacci).
+Backtracking (solving mazes, Sudoku).
+
+
+
+
+✅ Memory Trick
+
+Recursion =
+
+Base case → when to stop
+Recursive case → keep breaking problem down
+Think: “solve small piece + delegate the rest to myself”
+
+*/
+
+
+
+/* 
+
+
+Recursion is considered a functional programming (FP) approach because:
+
+Functional programming avoids loops
+Many functional languages (like Haskell) don’t even have traditional for or while loops.
+They use recursion as the main way to repeat actions.
+
+Immutability fits recursion
+Loops often mutate counters (i++) or accumulators.
+Recursion can work without mutating variables → it just returns new values.
+
+Declarative style
+Recursion expresses what the solution looks like, not how to iterate step by step.
+That matches FP’s declarative mindset.
+
+*/
+
+
+
+
+/* 
+
+🔹 Recursion (normal)
+
+Recursion = a function calls itself.
+Example → factorial:
+
+function factorial(n) {
+  if (n === 0) return 1;
+  return n * factorial(n - 1);  // recursive call
+}
+
+
+Problem: after the recursive call factorial(n - 1) finishes, the function still has to multiply by n.
+This means the current function frame must stay alive in memory → stack grows.
+For very large n, you’ll get a stack overflow error.
+
+
+
+🔹 Tail Recursion
+
+A function is tail-recursive if the recursive call is the last thing the function does.
+Nothing is left to do after the recursive call returns.
+
+Example → factorial rewritten as tail-recursive
+function factorial(n, acc = 1) {
+  if (n === 0) return acc;
+  return factorial(n - 1, acc * n); // recursive call is the last operation
+}
+
+
+Notice: no extra multiplication after the recursive call returns.
+All the work is passed into the acc (accumulator).
+This makes it eligible for tail-call optimization (TCO), if the engine supports it.
+
+
+
+
+🔹 Why Tail Recursion is Better
+
+In languages with TCO (like Scheme, Haskell), the engine reuses the current stack frame → no stack growth.
+That means you can recurse millions of times without stack overflow.
+
+In JavaScript (except Safari):
+Tail recursion works logically, but still grows the stack → still unsafe for very deep recursion.
+
+
+*/
+
+
+
+/* 
+
+Why Tail Recursion Can Be Worse in JS
+
+A tail-recursive function carries an extra accumulator parameter, which means each recursive call adds more data onto the stack.
+Since JS doesn’t optimize tail calls, every call still consumes stack space.
+For very large inputs, the tail-recursive version can blow the stack faster than a compact normal recursive version.
+
+
+
+Example:
+
+Normal factorial
+
+function factorial(n) {
+  if (n === 0) return 1;
+  return n * factorial(n - 1);
+}
+
+
+Tail-recursive factorial
+
+function factorial(n, acc = 1) {
+  if (n === 0) return acc;
+  return factorial(n - 1, acc * n);
+}
+
+#####################################
+Try with a large n (e.g., 100000):
+Both will crash with RangeError: Maximum call stack size exceeded
+But the tail-recursive one often crashes sooner, because each frame has a bit more work (extra parameter passing).
+#####################################
+
+
+
+4. Best practice in JS
+For large numbers or deep recursion → don’t rely on recursion in JS
+Use iteration (for, while) or simulate TCO manually with a trampoline
+
+✅ Summary
+
+Tail recursion is only better if the engine supports TCO (not true in JS, except Safari).
+In JS, both normal recursion and tail recursion will overflow the stack for large inputs.
+Tail recursion can even be worse because of the extra accumulator parameter overhead.
+
+*/
+
+
+
+
+/* 
+
+Trampolining is a technique to convert recursive function calls into an iterative process so you can avoid stack overflow.
+
+Instead of recursion going deeper and deeper on the call stack, each recursive step returns a thunk (a function describing the next step).
+A special function (the “trampoline”) repeatedly executes those thunks in a loop until a final value is produced.
+
+
+🔹 Why Do We Need It?
+
+In most languages with tail-call optimization (TCO) → tail recursion is safe.
+In JavaScript → most engines (V8, SpiderMonkey) don’t support TCO → recursion still overflows for large inputs.
+Trampolining is a workaround: you implement your own stack using thunks and a loop.
+
+🔹 How It Works
+
+Write your recursive function so it returns a function (thunk) instead of calling itself directly.
+A trampoline function takes that initial function and keeps evaluating until the result is a value, not a function.
+
+🔹 Trampoline Utility
+function trampoline(fn) {
+  return function (...args) {
+    let result = fn(...args);
+    while (typeof result === "function") {
+      result = result();  // call the thunk
+    }
+    return result;
+  };
+}
+
+🔹 Example 1: Factorial
+function factorial(n, acc = 1) {
+  if (n === 0) return acc;
+  return () => factorial(n - 1, acc * n); // return thunk
+}
+
+const safeFactorial = trampoline(factorial);
+
+console.log(safeFactorial(5));       // 120
+console.log(safeFactorial(100000));  // ✅ works, no stack overflow
+
+🔹 Example 2: Fibonacci (Tail Recursive)
+function fibonacci(n, a = 0, b = 1) {
+  if (n === 0) return a;
+  if (n === 1) return b;
+  return () => fibonacci(n - 1, b, a + b);
+}
+
+const safeFibonacci = trampoline(fibonacci);
+
+console.log(safeFibonacci(10));     // 55
+console.log(safeFibonacci(100000)); // ✅ no stack overflow
+
+🔹 When Trampolining is Best
+
+Works best with tail-recursive functions → each step is easy to turn into a thunk.
+Can be applied to non-tail recursion, but it’s messy.
+
+
+
+Benefits
+
+Prevents stack overflow in deep recursion.
+Lets you keep the elegance of recursion in JavaScript (where TCO isn’t available).
+Keeps function logic clean (no manual loop writing).
+
+🔹 Limitations
+
+Overhead: each step creates a thunk (extra function). Slightly slower than a simple loop.
+Not built-in: you must implement trampoline logic yourself.
+Messy with non-tail recursion: not as clean as tail recursion.
+
+✅ Summary
+
+Trampolining = “bounce” recursive calls into a loop.
+Use it in JavaScript when recursion is natural but risks stack overflow.
+Best with tail recursion, possible (but messy) with normal recursion.
+It simulates tail-call optimization (TCO) manually.
+
+*/
+
+
+/* 
+
+Two separate recursion problems:
+
+Stack overflow → solved by Tail Call Optimization (in some langs) or Trampolining (in JS manually)
+Overlapping subproblems (repeated branches) → solved by Memoization / Dynamic Programming
+
+*/
+
+
+
+/* 
+
+
+🔹 Trampolining vs Overlapping Subproblems
+
+Trampolining only fixes the stack overflow problem (space complexity).
+Overlapping subproblems is about time complexity (too many duplicate calls).
+They’re independent problems:
+Trampolining makes recursion safe for large depths.
+Memoization/dynamic programming makes recursion efficient for overlapping calls.
+
+✅ Summary
+
+Overlapping subproblems = time complexity issue (too slow).
+Stack overflow = space complexity issue (too deep recursion).
+Memoization fixes time.
+Trampolining (or TCO) fixes space.
+
+
+
+Trampolining only affects space complexity (stack usage), not time complexity
+
+Before trampolining:
+
+Every recursive call consumes a new stack frame.
+For n recursive calls, stack depth = O(n)
+Deep recursion → stack overflow
+
+After trampolining:
+
+Recursion is converted into iteration using thunks + loop.
+Stack depth = O(1), constant space.
+No stack overflow.
+
+
+*/
