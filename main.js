@@ -26,7 +26,7 @@ a style of programming where you describe what outcome you want and the underlyi
 Imperative Programming
 
 A programming style where you write explicit instructions that describe how the computer should perform tasks step by step, 
-while managing program state directly.
+while managing and maipulating program state directly.
 
 Procedural Programming (PP): Organizes code into procedures/functions that execute in sequence (e.g., C, Pascal).
 Object-Oriented Programming (OOP): Encapsulates state and behavior into objects and uses concepts 
@@ -2688,3 +2688,111 @@ Working in FP-friendly environments (JavaScript, Scala, Haskell, Elixir, F#).
 
 
 
+/* 
+
+
+Imperative Programming
+
+is all about discribing how programs operate step by step using statements
+that change a program's state
+
+
+*/
+
+
+let sum = 0 // state
+
+for (let i = 1; i <= 5; i++) {
+  sum += i // step by step instructions that change state
+  // mutated & updated 
+}
+
+
+// functional programming
+// its all about focusing wat need to be solved rather than how to solve it
+// using expressions that evaluate to values
+// avoiding shared state, mutable data, and side effects
+
+
+[1, 2, 3, 4, 5].reduce((acc, n) => acc + n, 0) 
+// no state mutation, no side effects
+
+
+// ANOTHER EXAMPLE
+
+
+// imperative programming
+const nums = [1, 2, 3, 4, 5]
+const evens = [];
+
+for (let i = 0; i < nums.length; i++) {
+  if (nums[i] % 2 === 0) {
+    evens.push(nums[i])
+  } 
+}// imperative, step by step instructions, mutable state (evens array is changed)
+
+// functional programming
+const evensFP = nums.filter(n => n % 2 === 0) 
+// declarative, what to do, no state mutation, no side effects
+
+
+// pure vs impure functions
+
+// pure functions
+
+/* 
+
+
+Pure Functions
+
+A pure function is a function that:
+Given the same input, always produces the same output
+Has no side effects (doesn’t modify external state, doesn’t depend on external mutable state)
+
+Key Properties
+Deterministic → same input → same output
+No side effects → doesn’t change variables outside its scope, 
+doesn’t do I/O like writing to a file or updating the DOM
+Testable → easy to test because output only depends on input
+Composable → can be combined with other pure functions safely
+
+
+
+
+Examples
+
+
+✅ Pure
+function add(a, b) {
+  return a + b;
+}
+
+console.log(add(2, 3)); // 5
+console.log(add(2, 3)); // always 5
+
+
+
+❌ Impure (side effect: changing external variable)
+let counter = 0;
+
+function increment() {
+  counter++;   // modifies external state
+  return counter;
+}
+
+console.log(increment()); // depends on external state
+
+❌ Impure (non-deterministic: uses Date)
+function getCurrentTime() {
+  return new Date().toISOString(); // depends on system time
+}
+
+Use Cases
+
+Functional programming (building blocks are pure functions)
+Predictable state updates (e.g., Redux reducers in React must be pure)
+Easier testing (just check inputs/outputs)
+Safer concurrency (no shared state mutation)
+
+
+*/
