@@ -2255,6 +2255,11 @@ Function composition (building bigger logic from small pieces).
 Asynchronous control (e.g., passing callbacks to setTimeout, promises).
 Event handling (pass handler functions).
 Currying/partial application.
+Callbacks: e.g. setTimeout(() => {...}, 1000)
+Event listeners: button.addEventListener("click", () => {...})
+Function factories: returning functions preconfigured with certain behavior
+Data transformations: arrays and streams
+Middleware & pipelines: composing many functions together
 
 */
 
@@ -2794,5 +2799,298 @@ Predictable state updates (e.g., Redux reducers in React must be pure)
 Easier testing (just check inputs/outputs)
 Safer concurrency (no shared state mutation)
 
+
+*/
+// additional pure vs impure function example
+const baselineCart = Object.freeze([
+  { id: 1, qty: 1 },
+  { id: 2, qty: 2 }
+])
+
+function addItemPure(cart, item) {
+  return [...cart, item] // pure: returns new array, leaves input untouched
+}
+
+let sharedCart = [...baselineCart]
+
+function addItemImpure(item) {
+  sharedCart.push(item) // impure: mutates external state
+  return sharedCart
+}
+
+const newCart = addItemPure(baselineCart, { id: 3, qty: 1 })
+console.log(newCart)
+console.log(baselineCart) // unchanged
+
+console.log(addItemImpure({ id: 3, qty: 1 }))
+console.log(addItemImpure({ id: 4, qty: 1 })) // result depends on sharedCart
+
+
+/* 
+
+✅ When to Use Pure Functions
+
+Use pure functions when you want:
+
+Predictability
+Pure functions always return the same result for the same inputs.
+Example: sum(a,b) → easy to reason about.
+
+Testability
+Since they don’t depend on external state, they’re easy to test in isolation.
+
+Reusability & Composition
+Pure functions can be combined to form more complex logic without side effects.
+
+Immutability / Functional style
+In state management (e.g., React reducers, Redux), pure functions ensure predictable state updates
+
+
+
+
+✅ When to Use Impure Functions
+
+Sometimes impure functions are necessary because programs must interact with the outside world:
+
+
+I/O Operations
+Reading from/writing to a database, file, or network.
+Logging to console.
+
+User Interaction
+Updating the DOM in a browser.
+Handling clicks, keypresses, etc.
+
+Randomness / Time
+Math.random() or Date.now() are inherently impure because they depend on external state (system clock, RNG).
+
+Side Effects by Design
+If your program must cause a visible effect (UI update, API call), you have to use impure functions
+
+*/
+
+
+
+
+/* 
+
+Referential Transparency means: an expression can be replaced by its value (or result)
+ without changing the behavior of the program.
+
+If a function is pure, then calling it with the same arguments always gives the same result.
+Therefore, any call to that function can be swapped with its result → that’s referential transparency.
+
+Key Points
+
+Depends on purity
+Only pure functions are referentially transparent.
+Impure functions (with side effects) are not referentially transparent.
+
+Substitutability
+If f(2,3) always returns 5, you can replace f(2,3) with 5 anywhere in your program, and nothing breaks.
+
+Predictability
+Code is easier to reason about because expressions are consistent and interchangeable with their values.
+
+
+
+
+
+Use Cases / Why Important
+
+Makes code easier to test → replace function calls with expected values.
+Helps in reasoning about correctness of programs.
+Enables compiler optimizations (e.g., memoization, lazy evaluation).
+Foundation of functional programming languages like Haskell.
+
+✅ Quick Memory Trick
+
+Pure functions ⇒ Referential Transparency.
+Impure functions ⇒ No Referential Transparency.
+If you can “replace with the result” safely, you have referential transparency.
+
+*/
+
+
+
+// first class functions
+// functions are treated like any other value
+// can be assigned to variables, passed as arguments, returned from other functions
+
+
+/* 
+// First-Class Functions
+functions are treated like any other value.
+That means in JavaScript:
+
+Functions can be assigned to variables
+Functions can be passed as arguments
+Functions can be returned from other functions
+Functions can be stored in data structures (arrays, objects)
+
+
+>> This is why higher-order functions, closures, and functional programming are natural in JS.
+
+Key Points
+
+Functions are objects in JS → they can have properties, be referenced, and manipulated.
+This makes higher-order functions possible (functions that take/return functions).
+Enables powerful patterns like callbacks, closures, currying, and functional programming.
+
+
+
+
+Examples
+1. Assigning to variables
+const greet = function(name) {
+  return "Hello, " + name;
+};
+
+console.log(greet("Hesham")); // "Hello, Hesham"
+
+2. Passing as arguments
+function processUserInput(fn) {
+  const name = "Hesham";
+  console.log(fn(name));
+}
+
+processUserInput(greet); // "Hello, Hesham"
+
+3. Returning functions
+function multiplier(factor) {
+  return function(num) {
+    return num * factor;
+  };
+}
+
+const double = multiplier(2);
+console.log(double(5)); // 10
+
+4. Storing in data structures
+const operations = [
+  x => x + 1,
+  x => x * 2,
+  x => x - 3
+];
+
+let value = 5;
+for (const op of operations) {
+  value = op(value);
+}
+console.log(value); // ((5+1)*2)-3 = 9
+
+*/
+
+
+
+const greet = function (name) {
+  return "Hello, " + name;
+}
+
+console.log(greet("Hesham")); // "Hello, Hesham"
+
+function processUserInput(fn) {
+  const name = "Hesham";
+  return fn(name);
+} 
+console.log(processUserInput(greet)); // "Hello, Hesham"
+
+// higher order functions
+/* 
+
+A Higher-Order Function (HOF) in JavaScript is a function that either 
+Takes one or more functions as arguments, or Returns a function as its result, or both.
+
+
+
+*/
+
+function multiplier(factor) {
+  return function (x) {
+    return x * factor;
+  };  
+}
+const double = multiplier(2);
+console.log(double(5)); // 10
+const triple = multiplier(3);
+console.log(triple(5)); // 15 
+
+
+
+/* 
+
+Immutability means that once a data structure (object, array, variable) is created, it cannot be changed.
+If you want to “modify” it, you create a new copy with the updated values, leaving the original unchanged.
+
+
+Key Points
+
+Primitives are immutable
+Numbers, strings, booleans → cannot be changed.
+Example: "hello"[0] = "H" does nothing; string stays "hello".
+
+Objects and arrays are mutable by default in JS
+But you can choose to treat them immutably by creating copies.
+
+Functional programming prefers immutability
+Easier to reason about (no hidden changes).
+Prevents bugs caused by shared mutable state.
+
+React & Redux rely on immutability
+State updates must create new objects, not mutate old ones.
+
+
+
+
+Examples
+
+✅ Immutable Update
+const arr = [1, 2, 3];
+
+// Instead of mutating with push
+const newArr = [...arr, 4];
+
+console.log(arr);    // [1, 2, 3]
+console.log(newArr); // [1, 2, 3, 4]
+
+❌ Mutable Update
+const arr = [1, 2, 3];
+arr.push(4); // modifies the original
+console.log(arr); // [1, 2, 3, 4]
+
+
+
+Objects
+const person = { name: "Hesham", age: 25 };
+
+// immutable update with spread
+const updated = { ...person, age: 26 };
+
+console.log(person); // { name: "Hesham", age: 25 }
+console.log(updated); // { name: "Hesham", age: 26 }
+
+
+
+
+
+
+Why Immutability Matters
+
+Predictability → no hidden changes to objects.
+Debugging → easier to track where data changes.
+Concurrency → safe when multiple parts of a program access the same data.
+React → detects changes via shallow comparison of old vs new state.
+
+
+
+Tools for Immutability
+Spread operator (...)
+Array methods that return new arrays (map, filter, slice, concat)
+Libraries: Immer.js, Immutable.js
+
+
+
+✅ Memory trick:
+Immutability = “don’t change the thing, make a new thing.”
 
 */
