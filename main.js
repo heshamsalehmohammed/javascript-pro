@@ -662,6 +662,17 @@ const result = show.bind(obj1).bind(obj2);
 
 result(); // ??? // Ali - still bound to obj1, second bind is ignored
 
+---------------------------
+.bind() Does
+Creates a new function with its this context fixed to the first argument.
+Optionally, pre-fills (partially applies) arguments.
+Does not call the function immediately (unlike .call and .apply).
+
+NOTE bind cannot lock the second argument and leave the first one unlocked
+to do this 
+A custom partial function with placeholders (like lodash does with _).
+Or rewrite a wrapper manually.
+
 
 
 
@@ -3428,6 +3439,530 @@ After trampolining:
 Recursion is converted into iteration using thunks + loop.
 Stack depth = O(1), constant space.
 No stack overflow.
+
+
+*/
+
+
+
+
+
+/* 
+
+Partial Application — one of the key techniques in functional programming
+
+
+🔹 Definition
+
+Partial Application is the process of taking a function with multiple arguments and fixing (pre-filling) (locking) some of its arguments, 
+returning a new function that takes the remaining arguments.
+It’s like saying: “I’ll give you some inputs now, and I’ll finish the rest later.”
+
+🔹 Key Points
+
+Turns a function of n arguments → into a function of m arguments (m < n).
+Makes functions more reusable and composable.
+Different from currying (currying always transforms a function into a chain of unary functions).
+
+
+
+
+
+
+🔹 Example in JavaScript
+1. Normal Function
+function multiply(a, b, c) {
+  return a * b * c;
+}
+
+2. Partial Application
+function partialMultiply(a) {
+  return function(b, c) {
+    return multiply(a, b, c);
+  };
+}
+
+const doubleAndX = partialMultiply(2);
+console.log(doubleAndX(3, 4)); // 24  (2 * 3 * 4)
+
+
+Here we fixed a = 2 and created a new function.
+
+
+🔹 Using Function.prototype.bind
+
+JS already supports partial application with bind:
+
+function multiply(a, b, c) {
+  return a * b * c;
+}
+
+const doubleAndX = multiply.bind(null, 2);
+console.log(doubleAndX(3, 4)); // 24
+
+🔹 More Realistic Example
+
+Suppose you have a logging function:
+
+function log(level, message) {
+  console.log(`[${level}] ${message}`);
+}
+
+
+You can create partials:
+
+const info = log.bind(null, "INFO");
+const error = log.bind(null, "ERROR");
+
+info("App started");   // [INFO] App started
+error("Something failed"); // [ERROR] Something failed
+
+
+
+🔹 Why Useful?
+
+Reduces duplication (you don’t have to pass the same argument again and again).
+Useful in event handling, configuration, logging, and React props.
+Helps create specialized functions out of general ones.
+
+✅ Memory Trick
+Partial Application = “lock in some arguments now, use the rest later.”
+
+*/
+
+
+
+
+/* 
+
+// Simple Partial Application
+
+function partial(func, ...fixedArgs) {
+  return function (...remainingArgs) {
+    return func(...fixedArgs, ...remainingArgs);
+  };
+}
+
+
+
+
+// Custom Partial Application with Placeholders
+
+const _ = Symbol("placeholder");
+
+function partial(func, ...presetArgs) {
+  return function(...laterArgs) {
+    let position = 0;
+    const finalArgs = presetArgs.map(arg =>
+      arg === _ ? laterArgs[position++] : arg
+    );
+    return func(...finalArgs, ...laterArgs.slice(position));
+  };
+}
+
+// Example
+function sum(a, b, c) {
+  return a + b + c;
+}
+
+const bindSecond = partial(sum, _, 2, _);
+console.log(bindSecond(5, 10)); // 17 (5 + 2 + 10)
+
+
+
+
+
+
+*/
+
+
+/* 
+
+Partial Application relies on three FP fundamentals:
+
+1. First-Class Functions
+
+Functions can be passed around like data.
+
+Without this, you couldn’t return a new function after fixing some arguments.
+
+Example:
+
+function partialMultiply(a) {
+  return function(b, c) {   // returning a new function
+    return a * b * c;
+  };
+}
+
+
+Here, partialMultiply returns a function — possible only because functions are first-class citizens in JS.
+
+2. Higher-Order Functions (HOFs)
+
+A HOF is a function that takes or returns another function.
+
+Partial application is implemented as a HOF because it returns a new function with some arguments pre-filled.
+
+function partial(fn, fixedA) {
+  return function(b, c) {    // HOF returns another function
+    return fn(fixedA, b, c);
+  };
+}
+
+3. Closures
+
+A closure lets the inner function “remember” the fixed arguments even after the outer function has finished executing.
+
+This is what makes the pre-filled values stay alive.
+
+function partial(fn, fixedA) {
+  return function(b, c) {
+    // inner function "remembers" fixedA via closure
+    return fn(fixedA, b, c);
+  };
+}
+
+const doubleAndX = partial((a,b,c) => a*b*c, 2);
+console.log(doubleAndX(3, 4)); // 24
+
+
+Even though partial has finished, the inner function still has access to fixedA.
+
+✅ Summary
+
+First-class functions → functions can be treated as data (return, pass, assign).
+HOFs → partial application is a higher-order function.
+Closures → preserve the fixed arguments for later calls.
+
+*/
+
+
+
+
+
+/* 
+
+
+
+Currying is the process of transforming a function that takes multiple arguments into a sequence of functions, 
+each taking exactly one argument, and returning another function until all arguments are provided.
+
+👉 In short:
+f(a, b, c) → f(a)(b)(c)
+
+
+
+🔹 Key Points
+
+Always unary functions
+Each function takes only one argument and returns another function.
+
+Enables partial application naturally
+Because you can stop after supplying some arguments.
+
+Pure FP technique
+Originated in functional languages like Haskell, but usable in JavaScript.
+
+Difference from Partial Application
+Partial application: fix some arguments at once → still allows multiple args per call.
+
+
+
+Currying: forces you to provide args one at a time.
+
+🔹 Examples
+1. Normal function
+function add(a, b, c) {
+  return a + b + c;
+}
+
+console.log(add(1, 2, 3)); // 6
+
+2. Curried version
+function curriedAdd(a) {
+  return function(b) {
+    return function(c) {
+      return a + b + c;
+    };
+  };
+}
+
+console.log(curriedAdd(1)(2)(3)); // 6
+
+3. With Arrow Functions
+const curriedAdd = a => b => c => a + b + c;
+console.log(curriedAdd(1)(2)(3)); // 6
+
+4. Use Case: Specializing Functions
+const multiply = a => b => a * b;
+
+const double = multiply(2);  // function that multiplies by 2
+console.log(double(5)); // 10
+
+const triple = multiply(3);
+console.log(triple(5)); // 15
+
+5. Functional Programming Example (Filtering)
+const greaterThan = x => y => y > x;
+
+const greaterThan10 = greaterThan(10);
+console.log([5, 12, 20].filter(greaterThan10)); // [12, 20]
+
+
+
+
+🔹 Use Cases
+
+Function reuse → make specialized functions by fixing some args.
+Composability → chain small functions together.
+Point-free style → writing code without explicitly passing args everywhere.
+React/Redux → often used in middleware, selectors, and hooks.
+
+✅ Summary
+
+Currying: break down f(a, b, c) into f(a)(b)(c).
+Helps create reusable, composable, specialized functions.
+Naturally supports partial application, but enforces 1-arg-at-a-time style.
+
+
+*/
+
+
+
+
+/* 
+
+1. Basic Currying
+const add = a => b => c => a + b + c;
+
+console.log(add(1)(2)(3)); // 6
+
+2. Dynamic Currying (variadic style)
+
+Here’s the pattern you asked about:
+
+function add(a) {
+  let sum = a;
+
+  function inner(b) {
+    if (b === undefined) return sum; // stop when no args
+    sum += b;
+    return inner; // return itself for chaining
+  }
+
+  return inner;
+}
+
+console.log(add(1)(5)(5)()); // 11
+console.log(add(5)(3)());    // 8
+
+
+👉 This works because of closures:
+
+sum is remembered inside inner.
+Each call updates sum.
+Calling with () and no argument ends the chain and returns the accumulated result.
+
+3. Use Cases
+
+Create fluent APIs (like jQuery’s chainable syntax).
+Handle unknown number of inputs elegantly.
+Useful in FP libraries for building reusable data pipelines.
+
+🔹 Summary
+
+Currying: break a multi-arg function into a chain of 1-arg functions (f(a)(b)(c)).
+Partial application: fix some args, call later with the rest (f(a, _, c)).
+Dynamic/variadic currying (what you showed): keep chaining until a stop condition (like empty ()) → then return the accumulated result.
+
+
+*/
+
+
+
+
+/* 
+
+Both currying and partial application involve “supplying fewer arguments than the original function expects.”
+Both produce a new function that remembers some arguments.
+In everyday JavaScript, the syntax can look very similar → so people mix them up.
+
+
+
+🔹 The Actual Difference
+
+
+Currying
+
+Always transforms a function of n arguments into a chain of n unary (1-arg) functions.
+Forces you to call functions one argument at a time.
+
+Example:
+
+const add = a => b => c => a + b + c;
+console.log(add(1)(2)(3)); // 6
+
+
+
+Partial Application
+
+Takes a function of n arguments and pre-fills some of them, returning a function that takes the rest.
+You can pass the remaining arguments all at once.
+
+Example:
+
+function add(a, b, c) {
+  return a + b + c;
+}
+
+const add1 = add.bind(null, 1);  // fix first arg = 1
+console.log(add1(2, 3)); // 6
+
+
+| Aspect         | Currying                          | Partial Application                            |
+| -------------- | --------------------------------- | ---------------------------------------------- |
+| Function arity | Always split into unary functions | Keeps arity flexible                           |
+| Calling style  | `f(a)(b)(c)`                      | `f(a)(b, c)`                                   |
+| Purpose        | Formal FP transformation          | Practical reusability (specializing functions) |
+| Implementation | Usually by hand or FP libs        | Often uses `.bind()` in JS                     |
+
+
+🔹 Why the Confusion?
+
+Syntax overlap
+
+curriedAdd(1)(2)(3) looks a lot like partial(add, 1)(2, 3).
+Both rely on closures
+Both use closures to “remember” arguments already given.
+Both allow “delayed argument supply”
+Which makes them feel the same until you look closely at arity.
+
+✅ Memory Trick
+
+Currying = break into a chain of one-arg functions.
+Partial application = pre-fill some args, call later with the rest.
+👉 “Currying is a transformation; partial application is a use case.”
+
+
+*/
+
+
+
+
+/* 
+
+Function Composition
+
+👉 Function composition is the process of combining multiple functions into a single function, 
+where the output of one function becomes the input of the next
+👉 It enables building complex logic from small, reusable functions
+
+
+
+🔑 Key Points
+
+👉 Small pure functions compose best
+👉 Order matters (compose = right-to-left, pipe = left-to-right)
+👉 Works best with unary (single argument) functions
+👉 Encourages immutability and declarative style
+👉 Needs different helpers for sync vs async
+👉 Contracts or types reduce runtime bugs
+
+🧩 Examples
+⚙️ Compose & Pipe Helpers
+const compose = (...fns) => x => fns.reduceRight((v, f) => f(v), x)
+const pipe = (...fns) => x => fns.reduce((v, f) => f(v), x)
+
+same as above
+// or more verbosely
+
+function pipe(...fns) {
+  return function (x) {
+    return fns.reduce(function (v, f) {
+      return f(v)
+    }, x)
+  }
+}
+
+✂️ Basic String Transformation
+const trim = s => s.trim()
+const toLower = s => s.toLowerCase()
+const slug = s => s.replace(/\s+/g, '-')
+
+const makeSlug1 = compose(slug, toLower, trim)
+const makeSlug2 = pipe(trim, toLower, slug)
+
+makeSlug1("  Hello World  ") // "hello-world"
+
+📦 Object Example
+const pick = key => obj => obj[key]
+const toPercent = n => `${Math.round(n * 100)}%`
+
+const ratingToPercent = pipe(
+  pick('rating'),
+  n => Math.max(0, Math.min(1, n)),
+  toPercent
+)
+
+ratingToPercent({ rating: 0.87 }) // "87%"
+
+🔢 Arrays Point-Free
+const map = f => xs => xs.map(f)
+const filter = p => xs => xs.filter(p)
+
+const isEven = n => n % 2 === 0
+const square = n => n * n
+
+const evenSquares = pipe(
+  filter(isEven),
+  map(square)
+)
+
+evenSquares([1, 2, 3, 4]) // [4, 16]
+
+🌐 Async Composition
+const pipeAsync = (...fns) => x =>
+  fns.reduce((p, f) => p.then(f), Promise.resolve(x))
+
+const fetchUser = id => fetch(`/api/users/${id}`).then(r => r.json())
+const pickName = u => u.name
+const shout = s => s.toUpperCase()
+
+const getUserNameShout = pipeAsync(fetchUser, pickName, shout)
+
+💡 Use Cases
+
+👉 Input validation & sanitization
+👉 Data transformation pipelines
+👉 UI state mapping (e.g., Redux selectors)
+👉 Middleware chains (Express, Koa)
+👉 Business rule checks (auth, logging)
+👉 Reusable array/object utilities
+
+✅ Benefits
+
+👉 Reuse of small functions
+👉 Readable left-to-right flow with pipe
+👉 Easy unit testing of small pieces
+👉 Encourages immutability & purity
+👉 Declarative style (focus on what not how)
+
+⚠️ Cons
+
+👉 Too many tiny functions reduce clarity
+👉 Harder to debug in long chains
+👉 Slight performance overhead in hot paths
+👉 Type mismatches only caught at runtime
+👉 Async error handling can be tricky
+
+📝 Takeaways
+
+👉 Prefer pipe for readability
+👉 Keep functions unary and pure
+👉 Use tap for logging without breaking flow
+👉 Guard with contracts or TypeScript
+👉 Separate sync vs async composition helpers
+
 
 
 */
