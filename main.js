@@ -3737,7 +3737,56 @@ const add = a => b => c => a + b + c;
 
 console.log(add(1)(2)(3)); // 6
 
-2. Dynamic Currying (variadic style)
+
+2.enhanced currying
+function add3(x, y, z) {
+  return x + y + z;
+}
+
+function curry(fn) {
+  return function curried(...args) {
+    if (args.length >= fn.length) {
+      return fn.apply(this, args);
+    } else {
+      return function (...args2) {
+        return curried.apply(this, args.concat(args2));
+      };
+    }
+  };
+}
+
+const curriedAdd = curry(add3);
+
+
+3. Enhanced Currying with Placeholders
+// Allows skipping arguments and filling them later (like lodash curry)
+const _ = Symbol("placeholder");
+
+function curryWithPlaceholder(fn) {
+  return function curried(...args) {
+    const complete = args.length >= fn.length && !args.includes(_);
+    if (complete) {
+      return fn.apply(this, args);
+    } else {
+      return function (...args2) {
+        // Replace placeholders with new arguments
+        const mergedArgs = args.map(arg => (arg === _ && args2.length ? args2.shift() : arg)).concat(args2);
+        return curried.apply(this, mergedArgs);
+      };
+    } 
+  };
+}
+
+const curriedAddPH = curryWithPlaceholder(add3);
+console.log(curriedAddPH(_, 2, 3)(1)); // 6
+console.log(curriedAddPH(1, _, 3)(2)); // 6
+console.log(curriedAddPH(1, 2, _)(3)); // 6
+
+// Pros: Very flexible, supports out-of-order argument application
+
+
+
+3. Dynamic Currying (variadic style)
 
 Here’s the pattern you asked about:
 
@@ -3964,5 +4013,24 @@ const getUserNameShout = pipeAsync(fetchUser, pickName, shout)
 👉 Separate sync vs async composition helpers
 
 
+
+*/
+
+
+
+
+
+/* 
+
+
+VERY IMPORTANT RESOURCES 
+
+
+Professor Fisby's Mostly Adequate Guide to Functional Programming
+https://drboolean.gitbooks.io/mostly-adequate-guide-old/content/
+
+
+medium article on functional programming
+https://medium.com/javascript-scene/master-the-javascript-interview-what-is-functional-programming-7f218c68b3a0
 
 */
