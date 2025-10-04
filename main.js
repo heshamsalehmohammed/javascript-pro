@@ -3474,13 +3474,101 @@ function processUserInput(fn) {
 } 
 console.log(processUserInput(greet)); // "Hello, Hesham"
 
-// higher order functions
+
 /* 
 
-A Higher-Order Function (HOF) in JavaScript is a function that either 
+👉 A Higher-Order Function (HOF) in JavaScript is a function that either 
 Takes one or more functions as arguments, or Returns a function as its result, or both.
+👉 They are a core feature of functional programming and make code more composable, reusable, and expressive
 
 
+🔑 Key Points
+
+👉 Treat functions as first-class citizens (functions can be passed around like variables)
+👉 Enable callbacks, function factories, and composition
+👉 Common in array methods (map, filter, reduce)
+👉 Can wrap, decorate, or enhance other functions
+
+🧩 Examples
+1. Function as Argument (Callback)
+function repeat(n, action) {
+  for (let i = 0; i < n; i++) {
+    action(i)
+  }
+}
+
+repeat(3, console.log)
+// 0
+// 1
+// 2
+
+2. Function Returning Another Function
+function multiplier(factor) {
+  return function(x) {
+    return x * factor
+  }
+}
+
+const double = multiplier(2)
+console.log(double(5)) // 10
+
+3. Array Methods (map, filter, reduce)
+const numbers = [1, 2, 3, 4]
+
+const squares = numbers.map(n => n * n)   // [1,4,9,16]
+const evens   = numbers.filter(n => n % 2 === 0) // [2,4]
+const sum     = numbers.reduce((a, b) => a + b, 0) // 10
+
+4. Custom Higher-Order Function (Decorator)
+function once(fn) {
+  let called = false
+  return (...args) => {
+    if (!called) {
+      called = true
+      return fn(...args)
+    }
+  }
+}
+
+const sayHiOnce = once(() => console.log("Hi"))
+sayHiOnce() // "Hi"
+sayHiOnce() // nothing
+
+5. Composition Helper (HOF creating new function)
+const compose = (f, g) => x => f(g(x))
+
+const toUpper = s => s.toUpperCase()
+const exclaim = s => s + "!"
+
+const shout = compose(exclaim, toUpper)
+console.log(shout("hello")) // "HELLO!"
+
+💡 Use Cases
+
+👉 Event handlers and callbacks (e.g., DOM events)
+👉 Function decorators (once, debounce, throttle)
+👉 Array transformations (map, filter, reduce)
+👉 Middleware systems (Express, Redux)
+👉 Function composition and pipelines
+
+✅ Benefits
+
+👉 More reusable and abstract code
+👉 Cleaner, declarative style
+👉 Great for handling async tasks and events
+👉 Encourages functional programming practices
+
+⚠️ Cons
+
+👉 May confuse beginners (functions returning functions)
+👉 Debugging is harder inside deep chains
+👉 Over-abstracting can reduce readability
+
+📝 Takeaway
+
+👉 A higher-order function is simply a function that accepts or returns another function
+👉 They’re everywhere in JS: array methods, event listeners, decorators, middleware, composition helpers
+👉 They are the foundation of functional programming in JavaScript
 
 */
 
@@ -3495,6 +3583,160 @@ const triple = multiplier(3);
 console.log(triple(5)); // 15 
 
 
+
+
+
+/* 
+
+👉 A combinator is a higher-order function that takes one or more functions as input and returns a new function
+👉 In JavaScript, combinators are often used for function composition and data transformation
+👉 They come from lambda calculus and functional programming
+
+🔑 Key Points
+
+👉 Combinators = “glue” functions
+👉 No external state → everything comes from arguments
+👉 Useful for composition, transformation pipelines, FP utilities
+👉 Common in Ramda, Lodash/fp, Redux, RxJS
+
+
+🧩 Combinator Examples
+1. Identity (I)
+const I = x => x
+console.log(I(42)) // 42
+
+2. Constant (K)
+const K = x => _ => x
+console.log(K("hello")("ignored")) // hello
+
+3. Compose (right → left)
+const compose = (...fns) => x => fns.reduceRight((v, f) => f(v), x)
+
+const trim = s => s.trim()
+const upper = s => s.toUpperCase()
+const exclaim = s => s + '!'
+
+const shout = compose(exclaim, upper, trim)
+console.log(shout("  hi  ")) // HI!
+
+4. Pipe (left → right)
+const pipe = (...fns) => x => fns.reduce((v, f) => f(v), x)
+
+const shout2 = pipe(trim, upper, exclaim)
+console.log(shout2("  hi  ")) // HI!
+
+5. Flip
+
+👉 Reverses the order of arguments for a function
+
+const flip = f => (a, b, ...rest) => f(b, a, ...rest)
+
+const subtract = (a, b) => a - b
+console.log(subtract(10, 5))     // 5
+console.log(flip(subtract)(10, 5)) // -5
+
+6. On
+
+👉 Runs a projection on inputs before applying a binary function
+
+const on = (op, proj) => (a, b) => op(proj(a), proj(b))
+
+const compareLength = on((a, b) => a - b, s => s.length)
+console.log(compareLength("cat", "horse")) // -2 (3 - 5)
+
+7. Sort by Length (using on)
+const sortByLength = arr =>
+  [...arr].sort(on((a, b) => a - b, s => s.length))
+
+console.log(sortByLength(["banana", "fig", "apple"])) 
+// [ 'fig', 'apple', 'banana' ]
+
+8. Fork / Converge
+
+👉 Apply two functions to the same input, then combine the results
+
+const fork = (join, f, g) => x => join(f(x), g(x))
+
+const average = fork((a, b) => a / b, arr => arr.reduce((s, n) => s + n, 0), arr => arr.length)
+
+console.log(average([10, 20, 30, 40])) // 25
+
+9. Until
+
+👉 Repeatedly apply a function until a condition is met
+
+const until = (pred, fn) => x => {
+  let v = x
+  while (!pred(v)) {
+    v = fn(v)
+  }
+  return v
+}
+
+const doubleUntil100 = until(x => x > 100, x => x * 2)
+console.log(doubleUntil100(3)) // 192
+
+10. Once
+
+👉 Wraps a function so it can only run once
+
+const once = fn => {
+  let done = false, result
+  return (...args) => {
+    if (!done) {
+      result = fn(...args)
+      done = true
+    }
+    return result
+  }
+}
+
+const init = once(() => console.log("Init only once"))
+init() // "Init only once"
+init() // nothing
+
+11. Tap
+
+👉 Run a side effect without breaking the chain
+
+const tap = f => x => (f(x), x)
+
+pipe(
+  x => x * 2,
+  tap(v => console.log("after double:", v)),
+  x => x + 1
+)(5) // logs 10 → returns 11
+
+💡 Use Cases
+
+👉 Function pipelines (compose, pipe)
+👉 Reordering / transforming arguments (flip, on)
+👉 Sorting & comparison helpers (sortByLength)
+👉 Combining results (fork / converge)
+👉 Controlled execution (until, once)
+👉 Debugging inside chains (tap)
+
+✅ Benefits
+
+👉 Encourages small, composable functions
+👉 Clear declarative data flow
+👉 Reusable across projects
+
+⚠️ Cons
+
+👉 Can be abstract for beginners
+👉 Too much functional jargon (I, K, S, etc.) may reduce readability
+👉 Debugging inside deep combinator chains can be harder
+
+📝 Takeaway
+
+👉 Combinators = higher-order functions for combining and controlling other functions
+👉 Core ones: compose, pipe, flip, on, fork/converge, until, once, tap, map
+👉 They provide the building blocks for functional programming in JavaScript
+
+
+
+*/
 
 /* 
 
@@ -3917,27 +4159,29 @@ No stack overflow.
 
 /* 
 
-Partial Application — one of the key techniques in functional programming
+📖 Definition
 
-
-🔹 Definition
-
-Partial Application is the process of taking a function with multiple arguments and fixing (pre-filling) (locking) some of its arguments, 
+👉 Partial Application — one of the key techniques in functional programming
+👉 Partial application is the process of taking a function with multiple arguments and fixing (pre-filling) (locking) some of its arguments, 
 returning a new function that takes the remaining arguments.
-It’s like saying: “I’ll give you some inputs now, and I’ll finish the rest later.”
-
-🔹 Key Points
-
-Turns a function of n arguments → into a function of m arguments (m < n).
-Makes functions more reusable and composable.
-Different from currying (currying always transforms a function into a chain of unary functions).
+👉 It’s like “pre-filling” a function’s parameters
+👉 It’s like saying: “I’ll give you some inputs now, and I’ll finish the rest later.”
 
 
+🔑 Key Points
+
+👉 Partial application ≠ currying (though they are related)
+👉 Currying transforms a function of many args into a sequence of unary functions
+👉 Partial application just fixes some args now and lets you supply the rest later
+👉 Turns a function of n arguments → into a function of m arguments (m < n).
+👉 Makes functions more reusable and composable.
+👉 Often used to create specialized versions of generic functions
 
 
 
 
-🔹 Example in JavaScript
+
+1. Simple Partial Application
 1. Normal Function
 function multiply(a, b, c) {
   return a * b * c;
@@ -3957,7 +4201,7 @@ console.log(doubleAndX(3, 4)); // 24  (2 * 3 * 4)
 Here we fixed a = 2 and created a new function.
 
 
-🔹 Using Function.prototype.bind
+2. Using bind for Partial Application
 
 JS already supports partial application with bind:
 
@@ -3968,7 +4212,17 @@ function multiply(a, b, c) {
 const doubleAndX = multiply.bind(null, 2);
 console.log(doubleAndX(3, 4)); // 24
 
-🔹 More Realistic Example
+
+3. Real-World Example (DOM Event)
+function addEvent(el, event, handler) {
+  el.addEventListener(event, handler)
+}
+
+const onClick = partial(addEvent, document.getElementById("btn"), "click")
+onClick(() => console.log("Button clicked!"))
+
+
+# More Realistic Example
 
 Suppose you have a logging function:
 
@@ -3987,14 +4241,31 @@ error("Something failed"); // [ERROR] Something failed
 
 
 
-🔹 Why Useful?
+💡 Use Cases
 
-Reduces duplication (you don’t have to pass the same argument again and again).
-Useful in event handling, configuration, logging, and React props.
-Helps create specialized functions out of general ones.
+👉 Creating specialized functions from generic ones
+👉 Reusing utility functions with preconfigured arguments
+👉 Configuring event handlers
+👉 Building APIs and middleware (e.g., Express route handlers)
+👉 Readability (clearer intent with fixed parameters)
 
-✅ Memory Trick
-Partial Application = “lock in some arguments now, use the rest later.”
+✅ Benefits
+
+👉 Reduces repetition by “preloading” common args
+👉 Improves readability with more descriptive functions
+👉 Encourages reusability and modularity
+
+⚠️ Cons
+
+👉 Can be confused with currying
+👉 Overuse may make code harder to follow
+👉 Native bind is limited (only fixes leading args)
+
+📝 Takeaway
+
+👉 Partial application = pre-filling some arguments of a function
+👉 It returns a new function waiting for the rest of the args
+👉 You can implement it manually, use bind, or libraries like Lodash (_.partial)
 
 */
 
@@ -4111,28 +4382,34 @@ Closures → preserve the fixed arguments for later calls.
 /* 
 
 
+📖 Definition
 
-Currying is the process of transforming a function that takes multiple arguments into a sequence of functions, 
+👉 Currying is the process of transforming a function that takes multiple arguments into a sequence of functions, 
 each taking exactly one argument, and returning another function until all arguments are provided.
-
-👉 In short:
-f(a, b, c) → f(a)(b)(c)
+👉 Instead of calling f(a, b, c), you call f(a)(b)(c)
 
 
 
-🔹 Key Points
+🔑 Key Points
 
+
+👉 Always returns a new function until all arguments are supplied
 Always unary functions
 Each function takes only one argument and returns another function.
 
-Enables partial application naturally
-Because you can stop after supplying some arguments.
+👉 Makes functions more reusable & composable
 
-Pure FP technique
+👉 Enables partial application naturally
+Because you can stop after supplying some arguments.
+currying is one of the ways to get partial application
+
+👉 Pure FP technique
 Originated in functional languages like Haskell, but usable in JavaScript.
 
-Difference from Partial Application
-Partial application: fix some arguments at once → still allows multiple args per call.
+👉 Different from partial application:
+Partial Application → fix some arguments now, pass the rest later
+Currying → transform a multi-arg function into chained single-arg calls
+👉 Common in functional programming libraries (Ramda, Lodash/fp)
 
 
 
@@ -4177,20 +4454,33 @@ const greaterThan10 = greaterThan(10);
 console.log([5, 12, 20].filter(greaterThan10)); // [12, 20]
 
 
+💡 Use Cases
 
+👉 Creating reusable, specialized functions (like pre-filled config)
+👉 Function composition (compose/pipe works best with curried functions)
+👉 Point-free style → writing code without explicitly passing args everywhere.
+👉 React/Redux → often used in middleware, selectors, and hooks.
+👉 Declarative code style in functional programming
+👉 Partially applying arguments step by step
 
-🔹 Use Cases
+✅ Benefits
 
-Function reuse → make specialized functions by fixing some args.
-Composability → chain small functions together.
-Point-free style → writing code without explicitly passing args everywhere.
-React/Redux → often used in middleware, selectors, and hooks.
+👉 Cleaner code when reusing functions with fewer arguments
+👉 Works naturally with compose/pipe pipelines
+👉 Encourages declarative, functional style
+👉 Enables powerful abstractions in libraries (Ramda, Redux, RxJS)
 
-✅ Summary
+⚠️ Cons
 
-Currying: break down f(a, b, c) into f(a)(b)(c).
-Helps create reusable, composable, specialized functions.
-Naturally supports partial application, but enforces 1-arg-at-a-time style.
+👉 Can confuse beginners (f(a)(b)(c) vs f(a, b, c))
+👉 Extra function calls may slightly impact performance in hot paths
+👉 Not always needed in simpler imperative code
+
+📝 Takeaway
+
+👉 Currying = breaking a multi-arg function into a chain of single-arg functions
+👉 Example: sum(1, 2, 3) → sum(1)(2)(3)
+👉 Works great with function composition and FP libraries
 
 
 */
@@ -4501,4 +4791,46 @@ https://drboolean.gitbooks.io/mostly-adequate-guide-old/content/
 medium article on functional programming
 https://medium.com/javascript-scene/master-the-javascript-interview-what-is-functional-programming-7f218c68b3a0
 
+*/
+
+/*
+  Functional Programming = declarative programming 
+  + immutability 
+  + pure functions 
+  + first class functions 
+  + higher order functions 
+  + recursion
+  + function composition 
+  + currying 
+  + partial application 
+  + closures 
+  + referential transparency 
+  + avoiding side effects 
+  + avoiding shared mutable state
+  + using expressions instead of statements 
+  + using functions as the main building blocks
+  + avoiding loops 
+  + using built-in FP methods (map, filter, reduce) 
+  + using libraries (Ramda, Lodash FP) 
+  + understanding monads and functors (advanced)
+  + using lazy evaluation (e.g., generators) 
+  + using tail call optimization (TCO) or trampolining for deep recursion 
+  + using memoization for performance 
+  + using point-free style (tacit programming) 
+  + using algebraic data types (ADTs) like Maybe, Either (advanced) 
+  + using lenses for immutable data access and updates (advanced)
+  + using type systems (TypeScript, Flow) for safer code 
+  + using functional reactive programming (FRP) for async data streams (advanced)
+  + using category theory concepts (functors, monads, applicatives) for advanced abstractions (very advanced)
+  + using combinators for building complex functions from simpler ones 
+  + using zippers for navigating and updating immutable data structures (advanced) 
+  + using optics for composable data access and manipulation (advanced) 
+  + using algebraic effects for handling side effects in a controlled manner (very advanced) 
+  + using dependent types for more expressive type systems (very advanced) 
+  + using homotopy type theory (HoTT) concepts for reasoning about programs (very advanced) 
+  + using functional design patterns (e.g., functor pattern, monad pattern) 
+  + using functional programming paradigms in different languages (Haskell, Scala, F#, Elm, Clojure, etc.) 
+  + understanding the trade-offs of functional programming vs other paradigms (OOP, procedural) 
+  + applying functional programming principles in real-world applications and projects
+  + continuously learning and exploring new FP concepts and techniques
 */
