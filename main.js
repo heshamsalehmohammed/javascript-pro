@@ -1002,6 +1002,121 @@ obj1.isPrototypeOf(obj2)
 
 */
 
+
+/* 
+
+Memory Management in JavaScript 👇
+
+📖 Definition
+
+👉 Memory management is the process of allocating, using, and freeing memory resources during the lifecycle of a program
+👉 In JavaScript, memory is managed automatically by the Garbage Collector (GC)
+
+🔑 Key Points
+
+👉 JavaScript uses automatic memory management (developers don’t manually allocate/free memory like in C/C++)
+👉 Memory lifecycle: allocate → use → release
+👉 Most memory leaks happen when objects remain referenced even if no longer needed
+👉 Common areas of concern: closures, event listeners, global variables, caches
+
+🧩 Examples
+Allocation
+
+👉 When you create variables, objects, arrays, functions, memory is allocated
+
+let num = 42
+let obj = { name: "Alice" }
+let arr = [1, 2, 3]
+
+Use
+
+👉 Accessing and modifying values
+
+console.log(obj.name) // "Alice"
+arr.push(4)
+
+Release (Garbage Collection)
+
+👉 If there are no more references to a value, GC will clean it up
+
+let user = { name: "Bob" }
+user = null // old object becomes unreachable → GC can collect it
+
+🧠 Garbage Collection
+
+👉 JavaScript engines (like V8 in Chrome/Node.js) use reachability-based garbage collection
+👉 If an object is reachable from root objects (like window in browsers or global in Node), it won’t be collected
+👉 Algorithm: Mark-and-Sweep
+
+Mark all reachable objects
+
+Sweep unreachable ones → free memory
+
+💡 Common Use Cases & Issues
+1. Closures
+function outer() {
+  let bigArray = new Array(1000000).fill('*')
+  return function inner() {
+    console.log(bigArray.length) // still referenced!
+  }
+}
+const leak = outer() // bigArray stays in memory
+
+
+👉 Avoid keeping unnecessary references in closures
+
+2. Event Listeners
+const btn = document.getElementById("click")
+btn.addEventListener("click", () => console.log("clicked"))
+
+// if btn is removed from DOM but listener not removed → memory leak
+
+
+👉 Always removeEventListener when cleaning up
+
+3. Globals
+
+👉 Variables defined globally stay in memory for entire app lifecycle
+
+window.bigCache = new Array(1000000).fill('*') // stays forever
+
+4. Timers & Intervals
+
+👉 Unstopped timers hold references
+
+setInterval(() => console.log("running"), 1000)
+// if never cleared → memory leak
+
+
+👉 Use clearInterval or clearTimeout
+
+✅ Benefits of Automatic Memory Management
+
+👉 Developer doesn’t worry about manual allocation/freeing
+👉 Safer than low-level languages (avoids dangling pointers)
+👉 Mark-and-Sweep GC reduces fragmentation
+
+⚠️ Cons & Pitfalls
+
+👉 GC is not predictable (you can’t force when it runs)
+👉 Still possible to create memory leaks via references
+👉 Large unused structures (arrays, objects) can clog memory
+👉 Debugging leaks can be hard without tools
+
+🛠️ Best Practices
+
+👉 Use let/const with proper scope (avoid var)
+👉 Nullify references if you no longer need them
+👉 Clean up event listeners, DOM nodes, timers
+👉 Prefer local variables over globals
+👉 Use WeakMap / WeakSet for caches (they allow GC on keys)
+👉 Monitor with Chrome DevTools → Memory tab
+
+*/
+
+
+
+
 /* 
 callback is simply a function that you pass into another function 
 so that it can be called later when some work is finished
