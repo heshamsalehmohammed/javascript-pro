@@ -5781,3 +5781,264 @@ https://medium.com/javascript-scene/master-the-javascript-interview-what-is-func
   + applying functional programming principles in real-world applications and projects
   + continuously learning and exploring new FP concepts and techniques
 */
+
+
+
+
+/* 
+
+📖 Definition
+
+👉 These are client-side storage mechanisms in the browser to persist data
+👉 Each has different scope, size limits, expiration, and use cases
+
+🔑 Key Points
+1. localStorage
+
+👉 Key–value storage in the browser
+👉 Data persists even after browser/tab is closed (until explicitly cleared)
+👉 API: setItem, getItem, removeItem, clear
+👉 Synchronous, string-only storage (~5–10MB)
+
+localStorage.setItem("username", "Alice")
+console.log(localStorage.getItem("username")) // "Alice"
+localStorage.removeItem("username")
+localStorage.clear()
+
+2. sessionStorage
+
+👉 Almost identical to localStorage, but tied to the current browser tab/session
+👉 Data is cleared when the tab or browser is closed
+👉 Useful for temporary data like form drafts or per-tab state
+
+sessionStorage.setItem("theme", "dark")
+console.log(sessionStorage.getItem("theme")) // "dark"
+sessionStorage.removeItem("theme")
+
+3. Cookies
+
+👉 Key–value pairs stored in the browser, but sent with every HTTP request to the server
+👉 Can have an expiration date (or be session-only)
+👉 Much smaller (~4KB)
+👉 Useful for authentication (session tokens, CSRF tokens)
+
+// Set cookie
+document.cookie = "user=Alice; path=/; max-age=3600"
+
+// Read cookies
+console.log(document.cookie) 
+// "user=Alice"
+
+// Delete cookie
+document.cookie = "user=; path=/; expires=Thu, 01 Jan 1970 00:00:00 UTC"
+
+
+
+| Feature             | localStorage             | sessionStorage   | Cookies                   |
+| ------------------- | ------------------------ | ---------------- | ------------------------- |
+| **Capacity**        | ~5–10MB                  | ~5–10MB          | ~4KB                      |
+| **Persistence**     | Until cleared            | Until tab closed | Configurable (expiry)     |
+| **Scope**           | Domain                   | Domain + tab     | Domain + path             |
+| **Sent to server?** | ❌ No                     | ❌ No             | ✅ Yes (with each request) |
+| **Data type**       | Strings only             | Strings only     | Strings only              |
+| **Use cases**       | Long-term prefs, caching | Per-tab data     | Auth, session IDs, tokens |
+
+
+
+💡 Use Cases
+
+👉 localStorage
+Save user settings (theme, language)
+Cache static data (e.g., API responses)
+Keep shopping cart across visits
+
+👉 sessionStorage
+Form data drafts in a single session
+Temporary UI state for a tab
+Prevents leakage across tabs
+
+👉 cookies
+Authentication tokens (JWT, session ID)
+CSRF protection
+Server-side session management
+
+✅ Benefits
+
+👉 All three give client-side persistence
+👉 localStorage and sessionStorage are simple APIs
+👉 Cookies can be read by server (for auth/session mgmt)
+
+⚠️ Cons
+
+👉 localStorage and sessionStorage:
+Only store strings (need JSON for objects)
+Block main thread (synchronous)
+Not sent to server automatically
+
+👉 Cookies:
+Small storage limit
+Sent with every request → bandwidth overhead
+Need extra security flags (HttpOnly, Secure, SameSite)
+
+📝 Takeaway
+
+👉 localStorage → large, persistent, client-only data
+👉 sessionStorage → per-tab/session, auto-clears on close
+👉 cookies → small, can be sent to server, used mainly for auth/session
+
+
+*/
+
+
+
+
+/* 
+
+TOKENS
+
+👉 If backend requires Authorization header → Hybrid (refresh in cookie, access in memory) is best.
+👉 If backend is changed to accept cookies for auth → Best practice = both access & refresh tokens in
+
+
+---------------------------------------
+👉 If backend requires Authorization header → Hybrid (refresh in cookie, access in memory) is best.
+👉 This is how many modern apps solve the problem: 
+Store Refresh Token in HttpOnly cookie (server auto-sends it, safe from XSS) 
+Store Access Token in memory (not localStorage) → short-lived (like 5–15 minutes) 
+When access token expires → use refresh token (cookie) to get a new one
+
+---------------------------------------
+👉 If backend is changed to accept cookies for auth → Best practice = both access & refresh tokens in
+
+🔄 Flow
+Login
+Server sets both access and refresh cookies (HttpOnly, Secure, SameSite).
+
+Normal API calls
+Browser automatically sends access cookie → backend validates it.
+
+Access token expires
+Frontend makes a /refresh request.
+Browser automatically includes the refresh cookie.
+Server issues a new access cookie.
+
+Logout
+Server clears both cookies by setting them with expired dates.
+
+
+*/
+
+
+
+
+
+/* 
+
+📖 Definition
+
+👉 IndexedDB is a low-level client-side database built into browsers.
+👉 It stores large amounts of structured data, including files/blobs, and lets you perform transactions and queries with indexes.
+👉 Unlike localStorage (simple key–value), IndexedDB is like a NoSQL object store in the browser.
+
+🔑 Key Points
+
+👉 Asynchronous API (uses events or Promises with wrappers like idb)
+👉 Stores objects instead of just strings
+👉 Supports indexes for efficient lookups
+👉 Can store much more data than localStorage (hundreds of MBs depending on browser)
+👉 Data persists even after browser is closed
+
+🧩 Basic Example (Vanilla IndexedDB API)
+// Open (or create) a DB
+const request = indexedDB.open("MyDB", 1)
+
+request.onupgradeneeded = function(event) {
+  const db = event.target.result
+  // create an object store (like a table)
+  if (!db.objectStoreNames.contains("users")) {
+    db.createObjectStore("users", { keyPath: "id" })
+  }
+}
+
+request.onsuccess = function(event) {
+  const db = event.target.result
+
+  // Add data
+  const tx = db.transaction("users", "readwrite")
+  const store = tx.objectStore("users")
+  store.add({ id: 1, name: "Alice", age: 25 })
+  store.add({ id: 2, name: "Bob", age: 30 })
+
+  tx.oncomplete = () => console.log("Users added")
+
+  // Read data
+  const readTx = db.transaction("users", "readonly")
+  const readStore = readTx.objectStore("users")
+  const getReq = readStore.get(1)
+  getReq.onsuccess = () => console.log("User 1:", getReq.result)
+}
+
+🧩 Using Promises with idb (easier)
+
+Install helper lib:
+
+npm install idb
+
+
+Usage:
+
+import { openDB } from "idb"
+
+async function setupDB() {
+  const db = await openDB("MyDB", 1, {
+    upgrade(db) {
+      db.createObjectStore("users", { keyPath: "id" })
+    }
+  })
+
+  // Insert
+  await db.put("users", { id: 1, name: "Alice" })
+  await db.put("users", { id: 2, name: "Bob" })
+
+  // Get
+  const user = await db.get("users", 1)
+  console.log("User:", user)
+
+  // Get all
+  const allUsers = await db.getAll("users")
+  console.log("All users:", allUsers)
+}
+
+setupDB()
+
+
+👉 With idb, the code is much cleaner (async/await instead of events).
+
+💡 Use Cases
+
+👉 Offline-first apps (PWA)
+👉 Large data storage (caching API responses, images, files)
+👉 Complex queries with indexes (search, filtering)
+👉 Apps like email clients, notes apps, to-do apps
+
+✅ Benefits
+
+👉 Much larger storage than localStorage
+👉 Can handle structured objects
+👉 Supports transactions → data integrity
+👉 Async → doesn’t block the main thread
+
+⚠️ Cons
+
+👉 Native API is verbose and event-driven (use idb for simpler code)
+👉 No SQL-like queries (you use key/value lookups and indexes)
+👉 Browser support is good, but behavior can differ slightly
+
+📝 Takeaway
+
+👉 IndexedDB = client-side NoSQL database
+👉 Great for large/structured data & offline apps
+👉 Use libraries like idb to simplify
+
+
+*/
