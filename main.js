@@ -6042,3 +6042,120 @@ setupDB()
 
 
 */
+
+
+
+/* 
+
+🔎 MutationObserver
+📖 Definition
+
+👉 A MutationObserver lets you watch for changes in the DOM (attributes, child nodes, text, etc.)
+👉 More efficient than setInterval polling because it runs only when mutations happen
+
+🔑 Key Points
+
+👉 Listens for changes like:
+Node added/removed
+Attribute changes
+Text content changes
+
+👉 Uses a callback that receives a list of mutations
+
+🧩 Example – Watching DOM Changes
+// Target node
+const target = document.getElementById("app")
+
+// Callback when mutations happen
+const observer = new MutationObserver(mutations => {
+  for (let mutation of mutations) {
+    console.log("Mutation type:", mutation.type)
+    if (mutation.type === "childList") {
+      console.log("Added nodes:", mutation.addedNodes)
+      console.log("Removed nodes:", mutation.removedNodes)
+    }
+    if (mutation.type === "attributes") {
+      console.log("Attribute changed:", mutation.attributeName)
+    }
+  }
+})
+
+// Start observing
+observer.observe(target, {
+  childList: true,       // listen for added/removed children
+  attributes: true,      // listen for attribute changes
+  subtree: true          // also observe descendants
+})
+
+// Example DOM mutation
+setTimeout(() => {
+  target.setAttribute("data-status", "active")
+  target.appendChild(document.createElement("div"))
+}, 1000)
+
+
+👉 Use cases:
+Detect when elements are added/removed
+Observe attribute changes (e.g., class, style)
+React to live content updates
+
+👁 IntersectionObserver
+📖 Definition
+
+👉 An IntersectionObserver lets you watch when an element enters or leaves the viewport (or a parent element)
+👉 Used for lazy loading, infinite scroll, and animations
+
+🔑 Key Points
+
+👉 Triggers callback when an element’s visibility changes relative to a root
+👉 Configurable with:
+
+root → viewport or container
+
+rootMargin → margin around root (like CSS margin)
+
+threshold → percentage of visibility required
+
+🧩 Example – Lazy Loading Images
+const images = document.querySelectorAll("img[data-src]")
+
+const observer = new IntersectionObserver(entries => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      const img = entry.target
+      img.src = img.dataset.src
+      observer.unobserve(img) // stop watching once loaded
+    }
+  })
+}, {
+  root: null,            // viewport
+  rootMargin: "0px",
+  threshold: 0.1         // 10% visible
+})
+
+images.forEach(img => observer.observe(img))
+
+
+👉 Use cases:
+
+Lazy load images/videos
+Trigger animations when elements come into view
+Infinite scroll (load more when user nears bottom)
+
+*/
+
+
+/* 
+
+| Feature       | MutationObserver                | IntersectionObserver              |
+| ------------- | ------------------------------- | --------------------------------- |
+| Watches what? | DOM structure/attribute changes | Visibility/viewport intersections |
+| Triggered by  | DOM mutations                   | Scrolling/viewport changes        |
+| Common uses   | Reacting to dynamic DOM updates | Lazy loading, infinite scroll     |
+| Efficiency    | Efficient vs polling            | Efficient vs scroll events        |
+
+
+Microtasks → run immediately after the current synchronous code, before rendering (examples: Promise.then, queueMicrotask, MutationObserver)
+Macrotasks → run in the task queue, after rendering (examples: setTimeout, setInterval, setImmediate, some events, IntersectionObserver)
+
+*/
