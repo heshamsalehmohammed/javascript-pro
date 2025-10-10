@@ -7049,3 +7049,1268 @@ Overuse can lead to abstraction bloat
 
 
 */
+
+
+
+
+
+/* 
+
+
+interface, abstract, and struct in TypeScript 👇
+
+🔹 interface
+📖 Definition
+
+👉 An interface defines the shape (contract) of an object: the properties and methods it must have.
+👉 It does not contain implementation — only the definition.
+
+🧩 Example
+interface Animal {
+  name: string
+  makeSound(): void
+}
+
+class Dog implements Animal {
+  name: string
+  constructor(name: string) {
+    this.name = name
+  }
+  makeSound() {
+    console.log("Woof!")
+  }
+}
+
+
+✅ Key Points:
+
+Supports multiple inheritance (class implements multiple interfaces)
+
+Only describes structure (no method bodies)
+
+Used widely for type safety and contracts
+
+🔹 abstract
+📖 Definition
+
+👉 An abstract class can have both abstract methods (no implementation) and normal methods (with implementation).
+👉 You cannot instantiate an abstract class directly.
+👉 Classes extending it must implement its abstract methods.
+
+🧩 Example
+abstract class Shape {
+  abstract area(): number   // must be implemented by subclass
+  describe() {
+    console.log("I am a shape")
+  }
+}
+
+class Circle extends Shape {
+  constructor(public radius: number) { super() }
+  area() {
+    return Math.PI * this.radius ** 2
+  }
+}
+
+const c = new Circle(5)
+console.log(c.area()) // 78.5
+
+
+✅ Key Points:
+
+Can contain real implementation (unlike interfaces)
+
+Enforces subclasses to implement missing pieces
+
+Useful when you want shared logic + required contracts
+
+🔹 struct
+📖 Definition
+
+👉 In TypeScript, there is no struct keyword (unlike C/C#).
+👉 But the role of a struct (a simple data container without behavior) can be simulated using:
+
+Type Aliases
+
+Interfaces
+
+🧩 Example with Type Alias (as a struct-like shape)
+type Point = {
+  x: number
+  y: number
+}
+
+const p: Point = { x: 10, y: 20 }
+
+
+👉 This acts like a struct in C#: just holds data, no behavior.
+
+
+
+| Feature              | `interface`                | `abstract class`               | `struct` (TS equivalent) |
+| -------------------- | -------------------------- | ------------------------------ | ------------------------ |
+| Instantiable         | ❌ No                       | ❌ No                           | ✅ Yes (as plain object)  |
+| Can have methods     | ❌ (only signatures)        | ✅ (abstract + concrete)        | ❌                        |
+| Multiple inheritance | ✅ Yes                      | ❌ No                           | ✅ (can combine via `&`)  |
+| Use case             | Contracts / shape checking | Base classes with partial impl | Lightweight data holder  |
+
+
+
+*/
+
+
+
+
+/* 
+
+Liskov Substitution Principle (LSP) in both JavaScript and TypeScript.
+
+📖 Definition
+
+👉 Liskov Substitution Principle (LSP) = If S is a subtype of T, then objects of type T should be replaceable with objects of type S without breaking the program.
+👉 In simple terms → subclasses should behave like their parent class.
+They should not violate expectations set by the base class.
+
+👉 If you have a parent class and a child class, 
+you should be able to use the child anywhere the parent is expected without things breaking or acting weird.
+
+👉 My Definition => objects of a superclass should be replacible of object of the subclass without affecting the correctness of the program 
+
+🔑 Key Ideas
+
+A child class must honor the contract of its parent class.
+No surprising behavior when substituting subclasses.
+If a subclass overrides a method, it must not weaken or break base behavior.
+
+🧩 Examples in JavaScript
+❌ Bad (violates LSP)
+class Bird {
+  fly() {
+    console.log("Flying...")
+  }
+}
+
+class Penguin extends Bird {
+  fly() {
+    throw new Error("Penguins can't fly!") 
+  }
+}
+
+function makeBirdFly(bird) {
+  bird.fly()
+}
+
+makeBirdFly(new Bird())    // ✅ works
+makeBirdFly(new Penguin()) // ❌ breaks contract
+
+
+👉 A Penguin is a Bird, but it breaks expectations because not all birds fly.
+
+✅ Good (respects LSP)
+class Bird {}
+class FlyingBird extends Bird {
+  fly() {
+    console.log("THIS BIRD IS FLYING!");
+  }
+}
+
+class Duck extends FlyingBird {
+  fly() {
+    console.log("Duck flying!");
+  }
+}
+
+class Eagle extends FlyingBird {
+  fly() {
+    console.log("Eagle flying!");
+  }
+}
+
+class Penguin extends Bird {}
+
+function makeBirdFly(bird) {
+  if (bird instanceof FlyingBird) {
+    bird.fly();
+  } else {
+    console.log("this bird CANNOT fly :(");
+  }
+}
+
+const duck = new Duck();
+const eagle = new Eagle();
+const penguin = new Penguin();
+
+makeBirdFly(duck); // Works fine
+makeBirdFly(eagle);
+makeBirdFly(penguin);
+
+
+
+👉 By separating FlyingBird from Penguin, the LSP is respected.
+
+
+
+
+💡 Use Cases
+
+Shapes (Rectangle, Square, Circle)
+Animals (Birds, Penguins, FlyingBirds)
+Payment systems (CreditCardPayment, PaypalPayment, CryptoPayment)
+
+✅ Benefits
+
+Prevents runtime surprises
+Enforces reliable inheritance
+Works well with interfaces in TypeScript
+Keeps code substitutable & predictable
+
+⚠️ Cons
+
+Sometimes requires restructuring inheritance (e.g., extracting interfaces or base classes)
+
+Can lead to more classes if misused
+
+📝 Takeaway
+
+👉 LSP = subclasses must be usable wherever the parent is expected
+👉 Don’t break contracts or introduce unexpected behavior
+👉 In JavaScript you follow this with careful class design
+👉 In TypeScript you enforce it better using interfaces
+
+
+*/
+
+
+
+
+/* 
+
+ISP – Interface Segregation Principle 👇
+
+📖 Definition
+
+👉 Interface Segregation Principle (ISP) says:
+Don’t force a class (or object) to depend on methods it doesn’t use.
+👉 In other words → many small, specific interfaces are better than one large, general one.
+
+
+--------------------------------------------------------------
+
+Javascript doesnt have interfaces in the way languages like jsva or typeScript do. 
+but the principle can still be applied by ensuring that objects or classes only implement methods they actually need.
+using duck typing or optional methods.
+
+--------------------------------------------------------------
+
+
+
+🔑 Key Idea
+
+A client should only implement what it actually needs
+Avoid “fat” interfaces with unrelated methods
+Encourages separation of responsibilities
+
+🧩 Example in JavaScript
+❌ Bad (violates ISP)
+class Machine {
+  print() {}
+  scan() {}
+  fax() {}
+}
+
+class OldPrinter extends Machine {
+  print() { console.log("Printing...") }
+  scan() { throw new Error("Not supported") }
+  fax() { throw new Error("Not supported") }
+}
+
+
+👉 OldPrinter is forced to implement scan and fax even though it doesn’t support them.
+
+✅ Good (respects ISP)
+class Printer {
+  print() {}
+}
+
+class Scanner {
+  scan() {}
+}
+
+class Fax {
+  fax() {}
+}
+
+class SimplePrinter extends Printer {
+  print() { console.log("Printing...") }
+}
+
+class MultiFunctionPrinter {
+  constructor(printer, scanner, fax) {
+    this.printer = printer
+    this.scanner = scanner
+    this.fax = fax
+  }
+  print() { this.printer.print() }
+  scan() { this.scanner.scan() }
+  fax() { this.fax.fax() }
+}
+
+
+👉 SimplePrinter only deals with printing.
+👉 If you need all 3 → you compose them together.
+
+💡 Real-World Analogy
+
+Think of a universal remote with 50 buttons:
+If your TV only supports 5 features, you’re stuck with 45 useless buttons.
+ISP says → give me a remote with just the buttons I actually need.
+
+💡 Use Cases
+
+Separate read and write repositories in backend apps (ReadableRepository, WritableRepository)
+UI components → Clickable, Draggable, Resizable instead of one giant Component interface
+Services → split NotificationService into EmailService, SMSService, etc.
+
+✅ Benefits
+
+No need to implement useless methods
+Easier to understand and test
+Reduces side effects from unused code
+Encourages modular, composable design
+
+⚠️ Cons
+
+Can lead to many small interfaces (too much granularity)
+
+Slightly more boilerplate to manage
+
+📝 Takeaway
+
+👉 ISP = split big interfaces into small, focused ones
+👉 Classes/objects should depend only on what they use
+👉 Keeps code clean, modular, and flexible
+
+
+
+in REACTjs
+
+
+
+ISP (Interface Segregation Principle) applies to React props.
+
+❌ Bad Example (violates ISP)
+
+👉 A single component expects too many props — some components must pass props they don’t even care about.
+
+function FormField({ label, value, onChange, onClick, onFocus, onBlur, onHover }) {
+  return (
+    <div onClick={onClick} onMouseEnter={onHover}>
+      <label>{label}</label>
+      <input
+        value={value}
+        onChange={onChange}
+        onFocus={onFocus}
+        onBlur={onBlur}
+      />
+    </div>
+  )
+}
+
+
+👉 Problem: not all consumers of FormField need onClick, onHover, etc.
+👉 A simple text field should not be forced to provide these extra props.
+
+✅ Good Example (respects ISP)
+
+👉 Break the big props interface into smaller, focused ones.
+
+// Small prop contracts
+interface BaseProps {
+  label: string
+  value: string
+}
+
+interface InputProps {
+  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void
+}
+
+interface ClickableProps {
+  onClick: () => void
+}
+
+interface HoverableProps {
+  onHover: () => void
+}
+
+// Compose only what you need
+function InputField({ label, value, onChange }: BaseProps & InputProps) {
+  return (
+    <div>
+      <label>{label}</label>
+      <input value={value} onChange={onChange} />
+    </div>
+  )
+}
+
+function ClickableBox({ label, value, onClick }: BaseProps & ClickableProps) {
+  return (
+    <div onClick={onClick}>
+      <label>{label}</label>
+      <span>{value}</span>
+    </div>
+  )
+}
+
+
+👉 Now:
+
+InputField only depends on onChange (no hover/click forced).
+ClickableBox only cares about onClick.
+
+💡 Why ISP Matters in React Props
+
+Makes components small and focused
+Prevents “fat” props objects with unused handlers
+Encourages reusability (you can combine only the props you need)
+Easier to test (each prop contract is simple)
+
+📝 Takeaway
+
+👉 Without ISP: components get bloated prop interfaces and consumers pass useless props
+👉 With ISP: props are split into small, meaningful groups — each component only uses what it needs
+
+
+
+
+ISP (Interface Segregation Principle) in React using HOCs (Higher-Order Components) and Hooks.
+This way, instead of making components depend on one giant interface, we compose them with only the behavior they need.
+
+🔹 Using Higher-Order Components (HOCs)
+
+👉 A HOC is a function that takes a component and returns a new component with extra behavior.
+
+Example: withHover HOC
+import React, { useState } from "react"
+
+// HOC to add hover behavior
+function withHover(WrappedComponent) {
+  return function Hoverable(props) {
+    const [hovered, setHovered] = useState(false)
+
+    return (
+      <div
+        onMouseEnter={() => setHovered(true)}
+        onMouseLeave={() => setHovered(false)}
+      >
+        <WrappedComponent {...props} hovered={hovered} />
+      </div>
+    )
+  }
+}
+
+// Usage
+function Button({ label, hovered }) {
+  return <button style={{ background: hovered ? "lightblue" : "white" }}>{label}</button>
+}
+
+const HoverableButton = withHover(Button)
+
+export default function App() {
+  return <HoverableButton label="Click Me" />
+}
+
+
+👉 Only components that need hover behavior are wrapped. Others remain unaffected.
+👉 This respects ISP by not forcing all components to accept hover props.
+
+🔹 Using Hooks
+
+👉 Hooks are a cleaner, modern way to do the same thing — instead of forcing every component to accept unused props, we compose behavior using hooks.
+
+Example: useHover Hook
+import { useState, useRef, useEffect } from "react"
+
+function useHover() {
+  const [hovered, setHovered] = useState(false)
+  const ref = useRef(null)
+
+  useEffect(() => {
+    const node = ref.current
+    if (!node) return
+
+    const handleEnter = () => setHovered(true)
+    const handleLeave = () => setHovered(false)
+
+    node.addEventListener("mouseenter", handleEnter)
+    node.addEventListener("mouseleave", handleLeave)
+
+    return () => {
+      node.removeEventListener("mouseenter", handleEnter)
+      node.removeEventListener("mouseleave", handleLeave)
+    }
+  }, [])
+
+  return [ref, hovered]
+}
+
+// Usage
+function Card({ text }) {
+  const [ref, hovered] = useHover()
+  return (
+    <div ref={ref} style={{ padding: 20, background: hovered ? "lightgreen" : "white" }}>
+      {text}
+    </div>
+  )
+}
+
+export default function App() {
+  return <Card text="Hover me!" />
+}
+
+
+👉 Components that need hover use useHover. Others don’t depend on it.
+👉 No bloated prop interface — each component only consumes what it needs.
+
+📊 ISP Applied with HOCs & Hooks
+Technique	How ISP is applied
+HOCs	Wrap only components that need extra behavior
+Hooks	Components opt-in to small, focused behavior hooks
+Both	Avoid bloated props interfaces with unused handlers
+📝 Takeaway
+
+👉 Without ISP: you create one giant component with tons of props (onHover, onClick, onResize, …)
+👉 With ISP: you use HOCs or Hooks to attach behavior only where needed
+👉 This keeps components focused, clean, and composable
+*/
+
+
+
+
+/* 
+
+
+JavaScript doesn’t have formal interfaces like Java or TypeScript, but the Interface Segregation Principle (ISP) is still totally applicable.
+In JS we use duck typing, optional methods, or clear object contracts to achieve the same outcome.
+
+📖 Restating ISP in JavaScript Terms
+
+👉 ISP = “Don’t force objects to have methods they don’t need.”
+👉 In JS, that means:
+
+Don’t create bloated base classes with unused methods.
+
+Don’t pass down props or configs with irrelevant options.
+
+Use small composable objects instead of one giant interface.
+
+🧩 Example with Duck Typing
+❌ Bad (violates ISP)
+class Machine {
+  print() {}
+  scan() {}
+  fax() {}
+}
+
+class SimplePrinter extends Machine {
+  print() { console.log("Printing...") }
+  scan() { throw new Error("Not supported") }
+  fax() { throw new Error("Not supported") }
+}
+
+
+👉 Problem: SimplePrinter is forced to “pretend” it supports scan/fax.
+
+✅ Good (ISP with Duck Typing)
+class Printer {
+  print() { console.log("Printing...") }
+}
+
+class Scanner {
+  scan() { console.log("Scanning...") }
+}
+
+class MultiFunctionPrinter {
+  constructor(printer, scanner) {
+    this.printer = printer
+    this.scanner = scanner
+  }
+  print() { this.printer.print() }
+  scan() { this.scanner.scan() }
+}
+
+
+👉 Each object only does what it should.
+👉 Clients use only the functionality they need.
+
+🧩 Example with Props in React (Optional Methods)
+❌ Bad
+function Button({ onClick, onHover, onResize, onDrag }) {
+  return <button onClick={onClick} onMouseEnter={onHover}>{}</button>
+}
+
+
+👉 Consumers are forced to pass unused props.
+
+✅ Good
+function Button({ onClick }) {
+  return <button onClick={onClick}>{}</button>
+}
+
+// Extend separately if needed
+function HoverableButton({ onHover, ...props }) {
+  return <button onMouseEnter={onHover} {...props} />
+}
+
+
+👉 Segregates props → components only depend on what they need.
+
+💡 Practical Tip in JS
+Since there’s no compiler-enforced interface:
+Use duck typing: “If it quacks like a duck…”
+Use optional methods: if (obj.scan) obj.scan()
+Use composition over inheritance
+
+📝 Takeaway
+
+👉 Even without formal interfaces, ISP applies in JavaScript:
+Break down large contracts into small, focused ones
+Don’t force objects/components to implement unused methods/props
+Favor duck typing + composition for clean design
+
+*/
+
+
+
+/* 
+
+
+Duck Typing in JavaScript 👇
+
+📖 Definition
+
+👉 Duck Typing = an object’s suitability is determined by its methods and properties rather than its actual type/class.
+
+The name comes from the phrase:
+👉 “If it walks like a duck and quacks like a duck, it’s a duck.”
+So → if an object has the right methods/properties, we can use it, no matter its actual class.
+
+🔑 Key Ideas
+
+JavaScript is dynamically typed → types are checked at runtime.
+No need for strict type declarations.
+Focus is on behavior not inheritance.
+Flexible, but errors only show up at runtime (no compiler checks like in TypeScript).
+
+🧩 Examples
+1. Function Accepting “Duck” Objects
+function makeItSpeak(animal) {
+  if (animal.speak) {
+    animal.speak()
+  } else {
+    console.log("This thing can't speak")
+  }
+}
+
+const dog = { speak: () => console.log("Woof!") }
+const cat = { speak: () => console.log("Meow!") }
+const car = { drive: () => console.log("Vroom!") }
+
+makeItSpeak(dog) // Woof!
+makeItSpeak(cat) // Meow!
+makeItSpeak(car) // This thing can't speak
+
+
+👉 Dog and Cat are “ducks” because they have speak().
+👉 Car doesn’t, so it’s not.
+
+2. Polymorphism via Duck Typing
+function printArea(shape) {
+  console.log(shape.area())
+}
+
+const circle = { radius: 5, area() { return Math.PI * this.radius ** 2 } }
+const square = { side: 4, area() { return this.side * this.side } }
+
+printArea(circle) // 78.5
+printArea(square) // 16
+
+
+👉 printArea doesn’t care what type shape is — only that it has an area() method.
+
+3. React Example with Props
+function Button({ action }) {
+  action() // expects action to be a function
+  return <button>Click</button>
+}
+
+// Works with anything that "looks like" a function
+<Button action={() => console.log("Clicked!")} />
+<Button action={function(){ alert("Hello") }} />
+
+
+👉 Duck typing: if it quacks like a function, it’s fine.
+
+💡 Real-World Analogy
+
+Think of USB devices:
+The computer doesn’t care if it’s a mouse, keyboard, or webcam.
+As long as it supports the USB protocol (the “duck behavior”), it works.
+
+✅ Benefits
+
+Very flexible, no strict type constraints
+Encourages reusable, polymorphic functions
+Reduces boilerplate inheritance
+
+⚠️ Cons
+
+No compile-time checking → errors only at runtime
+
+Can cause unexpected bugs if assumptions about object structure are wrong
+
+Harder to maintain in large codebases without TypeScript or docs
+
+📝 Takeaway
+
+👉 Duck Typing in JS = “if it has the right methods/properties, we treat it as that type”
+👉 Behavior matters more than inheritance/class
+👉 Great for flexibility, but needs discipline to avoid runtime bugs
+
+
+*/
+
+
+
+
+/* 
+
+
+📖 Definition
+
+👉 Dependency Inversion Principle (DIP) states:
+High-level modules should not depend on low-level modules. Both should depend on abstractions.
+👉 In simple terms → instead of a class directly depending on another concrete class, both should rely on an interface/contract.
+
+🔑 Key Ideas
+
+Invert the usual dependency direction → high-level code doesn’t “reach down” into details.
+High-level policies depend on abstractions, not implementations.
+Low-level details implement those abstractions.
+Encourages decoupling → easy to swap out implementations.
+
+🧩 Example in JavaScript
+❌ Bad (violates DIP)
+
+👉 UserService is tightly coupled to a specific database implementation.
+
+class MySQLDatabase {
+  connect() { console.log("Connected to MySQL") }
+  save(user) { console.log("Saving user in MySQL:", user) }
+}
+
+class UserService {
+  constructor() {
+    this.db = new MySQLDatabase() // tightly coupled
+  }
+  register(user) {
+    this.db.save(user)
+  }
+}
+
+
+👉 Problem: If you want to switch to MongoDB, you must change UserService.
+
+✅ Good (respects DIP with abstraction)
+
+👉 Define a contract (Database) and make services depend on it, not the concrete class.
+
+// Abstraction
+class Database {
+  save(user) { throw new Error("Must implement save()") }
+}
+
+// Concrete implementations
+class MySQLDatabase extends Database {
+  save(user) { console.log("Saving in MySQL:", user) }
+}
+
+class MongoDatabase extends Database {
+  save(user) { console.log("Saving in MongoDB:", user) }
+}
+
+// High-level module
+class UserService {
+  constructor(database) {
+    this.db = database // depends on abstraction
+  }
+  register(user) {
+    this.db.save(user)
+  }
+}
+
+// Usage
+const userService1 = new UserService(new MySQLDatabase())
+userService1.register({ name: "Alice" })
+
+const userService2 = new UserService(new MongoDatabase())
+userService2.register({ name: "Bob" })
+
+
+👉 Now UserService doesn’t care how saving is done — it only depends on the Database contract.
+
+💡 Real-World Analogy
+
+Think of a wall socket:
+Your laptop charger works regardless of whether electricity comes from solar, hydro, or coal.
+The charger only cares that the socket provides electricity at the right voltage (the abstraction).
+
+💡 Use Cases in JS/Frontend
+
+API clients: A component depends on ApiService contract, not fetch or axios directly.
+Logging: App logs through a Logger interface → could log to console, file, or remote server.
+Storage: A service depends on Storage abstraction → could be localStorage, IndexedDB, or cookies.
+
+✅ Benefits
+
+Flexible → can swap implementations easily
+Improves testability (mock interfaces in unit tests)
+Promotes modular, decoupled code
+Works hand-in-hand with other SOLID principles
+
+⚠️ Cons
+
+Adds extra abstraction layers → more boilerplate
+Can overcomplicate small/simple projects
+Needs discipline in defining meaningful abstractions
+
+📝 Takeaway
+
+👉 DIP = high-level logic depends on abstractions, not concrete classes
+👉 Makes your system decoupled, testable, and flexible
+👉 In JS, implement DIP with duck typing, base classes, or dependency injection
+
+
+
+*/
+
+
+
+
+/* 
+
+DIP in React 👇
+
+📖 Goal
+
+👉 A React component should not depend on localStorage directly.
+👉 Instead → it depends on a Storage abstraction so you can easily swap localStorage, sessionStorage, or even IndexedDB without changing the component.
+
+🔹 Step 1 – Define the Abstraction
+// storageService.js
+export class StorageService {
+  setItem(key, value) {
+    throw new Error("setItem must be implemented")
+  }
+  getItem(key) {
+    throw new Error("getItem must be implemented")
+  }
+  removeItem(key) {
+    throw new Error("removeItem must be implemented")
+  }
+}
+
+
+👉 This is the contract → any storage provider must implement these methods.
+
+🔹 Step 2 – Implement Concrete Services
+// localStorageService.js
+import { StorageService } from "./storageService.js"
+
+export class LocalStorageService extends StorageService {
+  setItem(key, value) {
+    localStorage.setItem(key, JSON.stringify(value))
+  }
+  getItem(key) {
+    const value = localStorage.getItem(key)
+    return value ? JSON.parse(value) : null
+  }
+  removeItem(key) {
+    localStorage.removeItem(key)
+  }
+}
+
+// sessionStorageService.js
+import { StorageService } from "./storageService.js"
+
+export class SessionStorageService extends StorageService {
+  setItem(key, value) {
+    sessionStorage.setItem(key, JSON.stringify(value))
+  }
+  getItem(key) {
+    const value = sessionStorage.getItem(key)
+    return value ? JSON.parse(value) : null
+  }
+  removeItem(key) {
+    sessionStorage.removeItem(key)
+  }
+}
+
+
+👉 You can now plug in any storage mechanism as long as it respects the StorageService contract.
+
+🔹 Step 3 – React Component Using Abstraction
+import React, { useState } from "react"
+import { LocalStorageService } from "./localStorageService.js"
+// import { SessionStorageService } from "./sessionStorageService.js"
+
+const storage = new LocalStorageService() // DIP: swap this easily
+
+export default function UserPreferences() {
+  const [theme, setTheme] = useState(storage.getItem("theme") || "light")
+
+  const toggleTheme = () => {
+    const newTheme = theme === "light" ? "dark" : "light"
+    setTheme(newTheme)
+    storage.setItem("theme", newTheme)
+  }
+
+  return (
+    <div style={{ padding: 20, background: theme === "light" ? "#fff" : "#333", color: theme === "light" ? "#000" : "#fff" }}>
+      <h2>Theme: {theme}</h2>
+      <button onClick={toggleTheme}>Toggle Theme</button>
+    </div>
+  )
+}
+
+
+👉 The component doesn’t know about localStorage or sessionStorage → it only depends on the abstraction.
+👉 You can swap LocalStorageService with SessionStorageService (or another) without changing the component.
+
+📊 Why This Respects DIP
+
+High-level module → UserPreferences component
+Low-level module → concrete storage (localStorage, sessionStorage)
+Abstraction → StorageService contract
+Both depend on the abstraction, not each other
+
+📝 Takeaway
+
+👉 With DIP in React:
+Components depend on contracts (interfaces/abstractions), not implementations.
+You can swap implementations (localStorage ↔ sessionStorage ↔ API-based storage) without touching the component.
+Code becomes testable (inject a mock storage in unit tests).
+
+
+
+*/
+
+
+
+
+/* 
+
+Dependency Injection (DI) containers to help apply the Dependency Inversion Principle. 
+They let you register dependencies and resolve them automatically, instead of manually wiring everything together.
+
+Here are some of the most popular ones:
+
+🔹 1. InversifyJS
+
+One of the most widely used DI frameworks for Node.js (and TypeScript).
+Based on decorators (like @injectable, @inject) and IoC container.
+Works great with OOP-heavy applications.
+
+import "reflect-metadata"
+import { Container, injectable, inject } from "inversify"
+
+interface Warrior { fight(): string }
+interface Weapon { hit(): string }
+
+@injectable()
+class Katana implements Weapon {
+  hit() { return "cut!" }
+}
+
+@injectable()
+class Samurai implements Warrior {
+  constructor(@inject("Weapon") private weapon: Weapon) {}
+  fight() { return this.weapon.hit() }
+}
+
+const container = new Container()
+container.bind<Weapon>("Weapon").to(Katana)
+container.bind<Warrior>("Warrior").to(Samurai)
+
+const warrior = container.get<Warrior>("Warrior")
+console.log(warrior.fight()) // cut!
+
+
+👉 Best if you’re using TypeScript and OOP-style code.
+
+🔹 2. Awilix
+
+Lightweight DI container for Node.js.
+Great for functional and class-based services.
+Works well with Express/Koa apps.
+Supports both class-based injection and function injection.
+
+const { createContainer, asClass } = require("awilix")
+
+class UserService {
+  constructor({ logger }) {
+    this.logger = logger
+  }
+  getUser(id) { this.logger.log(`Fetching user ${id}`) }
+}
+
+class Logger {
+  log(msg) { console.log(msg) }
+}
+
+const container = createContainer()
+container.register({
+  userService: asClass(UserService).scoped(),
+  logger: asClass(Logger).singleton()
+})
+
+const userService = container.resolve("userService")
+userService.getUser(1)
+
+
+👉 Best for Node.js apps following clean architecture or hexagonal architecture.
+
+🔹 3. TSyringe
+
+Lightweight TypeScript DI container from Microsoft.
+
+Uses decorators and reflection (like Inversify but simpler).
+
+import "reflect-metadata"
+import { injectable, inject, container } from "tsyringe"
+
+@injectable()
+class Foo {
+  sayHello() { console.log("Hello from Foo") }
+}
+
+@injectable()
+class Bar {
+  constructor(private foo: Foo) {}
+  run() { this.foo.sayHello() }
+}
+
+const bar = container.resolve(Bar)
+bar.run() // Hello from Foo
+
+
+👉 Best if you want something simpler than Inversify but still decorator-driven.
+
+🔹 4. Node Dependency Injection (node-dependency-injection)
+
+Inspired by Symfony’s DI container (from PHP).
+Config-driven (YAML/JSON), useful for large enterprise Node.js apps.
+
+
+| Package         | Best For                       | Style              | Notes            |
+| --------------- | ------------------------------ | ------------------ | ---------------- |
+| **InversifyJS** | Large OOP/TS apps              | Decorator-heavy    | Rich features    |
+| **Awilix**      | Express/Koa, FP or OOP apps    | Config-first       | Simple, flexible |
+| **TSyringe**    | TypeScript, simpler projects   | Decorator-based    | Lightweight      |
+| **node-di**     | Enterprise, config-driven apps | Config (YAML/JSON) | Heavier          |
+
+
+
+
+*/
+
+
+
+/* 
+
+Dependency Inversion Principle (DIP) with Dependency Injection (DI).
+They are related but different concepts. Let’s break them down:
+
+🔹 Dependency Inversion Principle (DIP) – a Principle
+
+📖 From SOLID principles:
+👉 High-level modules should not depend on low-level modules. Both should depend on abstractions.
+
+DIP is about design philosophy
+
+It says your code should depend on abstractions (contracts/interfaces), not concrete implementations
+
+Ensures flexibility and decoupling
+
+Example (JS):
+
+// ❌ Without DIP
+class MySQLDatabase {
+  save(user) { console.log("Saving in MySQL:", user) }
+}
+
+class UserService {
+  constructor() {
+    this.db = new MySQLDatabase() // tightly coupled
+  }
+  register(user) { this.db.save(user) }
+}
+
+// ✅ With DIP (depends on abstraction)
+class Database {
+  save(user) { throw new Error("Not implemented") }
+}
+
+class MySQLDatabase extends Database {
+  save(user) { console.log("Saving in MySQL:", user) }
+}
+
+class UserService {
+  constructor(db) { this.db = db } // depends on abstraction
+  register(user) { this.db.save(user) }
+}
+
+const service = new UserService(new MySQLDatabase())
+service.register({ name: "Alice" })
+
+
+👉 DIP says: design against contracts, not concrete classes.
+
+🔹 Dependency Injection (DI) – a Technique/Pattern
+
+📖 Dependency Injection is a way to implement DIP.
+👉 Instead of a class creating its own dependencies, you inject them from outside.
+
+DI is about how you supply dependencies (constructor injection, setter injection, context/container injection)
+
+It doesn’t enforce abstraction by itself — but is usually used with DIP
+
+Example (using DI):
+
+// We inject the dependency from outside
+const db = new MySQLDatabase()
+const service = new UserService(db)  // dependency injected
+
+
+👉 DI can be manual (like above) or automatic with a DI container (e.g., InversifyJS, Awilix).
+
+
+| Concept                                  | What it is                 | Purpose                                                                 | Example                                                                          |
+| ---------------------------------------- | -------------------------- | ----------------------------------------------------------------------- | -------------------------------------------------------------------------------- |
+| **Dependency Inversion Principle (DIP)** | A principle (from SOLID)   | High-level modules depend on abstractions, not concrete implementations | Service depends on `Database` interface, not `MySQLDatabase` directly            |
+| **Dependency Injection (DI)**            | A design pattern/technique | Provide dependencies from outside instead of creating them internally   | Passing `new MySQLDatabase()` into `UserService` instead of instantiating inside |
+
+
+📝 Takeaway
+
+👉 DIP = rule/principle (decouple using abstractions)
+👉 DI = technique/pattern (how you pass dependencies in)
+👉 DIP can exist without DI (you can still depend on abstractions), but DI is usually the easiest way to enforce DIP in practice.
+
+
+Dependency Inversion Principle (DIP) and Dependency Injection (DI) into action in a Node.js + Express app.
+
+We’ll build a UserService that saves users into a database, but we’ll design it so the service doesn’t depend on a specific DB implementation.
+
+🔹 Step 1 – Define the Abstraction (DIP)
+// database.js
+class Database {
+  save(user) {
+    throw new Error("Must implement save()")
+  }
+}
+
+module.exports = Database
+
+
+👉 This is our contract.
+High-level modules (UserService) will depend on this, not on a concrete database.
+
+🔹 Step 2 – Create Implementations (Low-Level Modules)
+// mysqlDatabase.js
+const Database = require("./database")
+
+class MySQLDatabase extends Database {
+  save(user) {
+    console.log("💾 Saving user in MySQL:", user)
+  }
+}
+
+module.exports = MySQLDatabase
+
+// mongoDatabase.js
+const Database = require("./database")
+
+class MongoDatabase extends Database {
+  save(user) {
+    console.log("💾 Saving user in MongoDB:", user)
+  }
+}
+
+module.exports = MongoDatabase
+
+
+👉 Both implement the Database abstraction.
+
+🔹 Step 3 – High-Level Service (Depends on Abstraction)
+// userService.js
+class UserService {
+  constructor(database) {
+    this.db = database // dependency is injected
+  }
+
+  register(user) {
+    this.db.save(user)
+  }
+}
+
+module.exports = UserService
+
+
+👉 Notice: UserService does not create its own database.
+👉 It receives one through dependency injection (DI).
+
+🔹 Step 4 – Wire It in Express (DI Container or Manual)
+// app.js
+const express = require("express")
+const UserService = require("./userService")
+const MySQLDatabase = require("./mysqlDatabase")
+// const MongoDatabase = require("./mongoDatabase")
+
+const app = express()
+app.use(express.json())
+
+// 👉 Choose which DB implementation to inject
+const db = new MySQLDatabase()
+const userService = new UserService(db)
+
+app.post("/register", (req, res) => {
+  const user = req.body
+  userService.register(user)
+  res.json({ message: "User registered" })
+})
+
+app.listen(3000, () => console.log("🚀 Server running on port 3000"))
+
+
+👉 If tomorrow you want MongoDB instead → just replace:
+
+const db = new MongoDatabase()
+
+
+👉 No change needed inside UserService.
+
+📊 Summary
+
+DIP (principle):
+UserService depends on Database abstraction, not directly on MySQL/Mongo.
+
+DI (technique):
+We inject the database implementation into UserService from outside (app.js).
+
+📝 Takeaway
+
+👉 DIP keeps your design clean and decoupled.
+👉 DI is the way you implement DIP in practice (constructor injection, function injection, or using a DI container like Awilix or InversifyJS).
+
+
+*/
