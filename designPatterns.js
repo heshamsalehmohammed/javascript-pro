@@ -765,3 +765,107 @@ console.log(user)
 👉 Builder may use Fluent Interface as its syntax, but they’re not the same.
 
 */
+
+
+
+
+/* 
+
+Prototype Pattern in JavaScript.
+
+📖 Definition
+
+👉 The Prototype Pattern is a creational design pattern where new objects are created by cloning an existing object (the prototype) instead of creating them from scratch.
+👉 JavaScript is particularly suited for this pattern because its inheritance model is prototype-based by default.
+
+🔑 Key Ideas
+
+Avoids expensive object creation by reusing an existing instance.
+Provides a base (prototype) object → clones create new variations.
+JavaScript’s Object.create() is the direct implementation of this pattern.
+
+🧩 Example 1: Basic Prototype with Object.create
+const carPrototype = {
+  drive() { console.log(`Driving a ${this.make} ${this.model}`) }
+}
+
+const car1 = Object.create(carPrototype)
+car1.make = "Toyota"
+car1.model = "Corolla"
+
+const car2 = Object.create(carPrototype)
+car2.make = "Tesla"
+car2.model = "Model 3"
+
+car1.drive() // Driving a Toyota Corolla
+car2.drive() // Driving a Tesla Model 3
+
+
+👉 Both car1 and car2 inherit from the same prototype.
+
+🧩 Example 2: Prototype with Classes (Cloning)
+class Person {
+  constructor(name, age) {
+    this.name = name
+    this.age = age
+  }
+  clone() {
+    return new Person(this.name, this.age)
+  }
+}
+
+const p1 = new Person("Alice", 25)
+const p2 = p1.clone()
+
+console.log(p1, p2)
+console.log(p1 === p2) // false (different objects)
+
+
+👉 The clone() method lets you duplicate objects easily.
+
+🧩 Example 3: Real-World → Shape Prototypes
+class Shape {
+  constructor(type) {
+    this.type = type
+  }
+  clone() {
+    return new Shape(this.type)
+  }
+}
+
+const circle = new Shape("Circle")
+const newCircle = circle.clone()
+
+console.log(newCircle.type) // Circle
+
+
+👉 Instead of constructing a new shape from scratch, just clone an existing one.
+
+💡 Use Cases
+
+When object creation is costly (e.g., parsing configs, database records, images).
+Game development → clone enemies/objects instead of recreating.
+Prototypical inheritance in JS (every object has a prototype chain).
+Config templates → clone a base config and modify only what’s needed.
+
+✅ Benefits
+
+Efficient object creation (reuse instead of reconstruct).
+Simplifies creating families of similar objects.
+Natural fit in JavaScript since it’s prototype-based.
+
+⚠️ Cons
+
+Cloning may cause shallow copy issues (nested objects still reference the same data).
+Requires careful handling of deep clones when needed.
+Not as intuitive for developers from strictly class-based languages.
+
+📝 Takeaway
+
+👉 Prototype Pattern = create new objects by cloning existing ones
+👉 In JS, Object.create() and class.clone() are the typical ways to implement it
+👉 Great when object creation is expensive or repetitive
+
+
+
+*/
