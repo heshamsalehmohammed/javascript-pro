@@ -27,7 +27,7 @@ Strategy  -> DONE
 Command  -> DONE
 Iterator  -> DONE
 State  -> DONE
-Memento
+Memento  -> DONE
 Template Method
 Chain of Responsibility
 Mediator
