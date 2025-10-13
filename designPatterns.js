@@ -6273,3 +6273,543 @@ State changes how you’re working.”
 
 
 */
+
+
+
+
+/* 
+
+The Memento Pattern lets you capture and store an object’s internal state so that it can be restored later, without exposing its internal implementation details.
+
+In short:
+“Take a snapshot of an object so you can roll back later.”
+
+🧠 Key Ideas
+
+👉 Used to implement undo/redo or version history
+👉 Keeps the originator’s encapsulation intact — the caretaker never touches internal data directly
+👉 Consists of three main roles:
+Originator → the object whose state you want to save/restore
+Memento → a snapshot of the originator’s state (opaque to outsiders)
+Caretaker → stores and manages the history of mementos
+
+
+
+
+It’s like taking a snapshot 📸 of an object’s state — you can go back to that snapshot anytime.
+
+🧠 Real-world Analogy
+
+Think of a text editor with an undo button 📝
+Every time you make a change, the app saves a snapshot (memento).
+If you hit Undo, the editor restores the previous snapshot — no need to know how text is stored internally.
+
+⚙️ Key Points
+
+👉 The Originator is the object whose state we want to save.
+👉 The Memento stores that state (usually privately).
+👉 The Caretaker keeps track of mementos (like an undo stack).
+
+
+
+💡 Examples
+Example 1 — Text Editor Undo 📝
+// Memento
+class Memento {
+  constructor(state) {
+    this.state = state;
+  }
+  getState() {
+    return this.state;
+  }
+}
+
+// Originator
+class Editor {
+  constructor() {
+    this.content = "";
+  }
+  type(words) {
+    this.content += words;
+  }
+  save() {
+    return new Memento(this.content);
+  }
+  restore(memento) {
+    this.content = memento.getState();
+  }
+  getContent() {
+    return this.content;
+  }
+}
+
+// Caretaker
+class History {
+  constructor() {
+    this.stack = [];
+  }
+  push(memento) {
+    this.stack.push(memento);
+  }
+  pop() {
+    return this.stack.pop();
+  }
+}
+
+// Usage
+const editor = new Editor();
+const history = new History();
+
+editor.type("Hello ");
+history.push(editor.save());
+
+editor.type("World!");
+history.push(editor.save());
+
+editor.type(" Goodbye!");
+console.log(editor.getContent()); // Hello World! Goodbye!
+
+editor.restore(history.pop());
+console.log(editor.getContent()); // Hello World!
+
+editor.restore(history.pop());
+console.log(editor.getContent()); // Hello
+
+
+✅ Each saved state acts like a checkpoint — easy rollback.
+
+Example 2 — Game Save System 🎮
+class Game {
+  constructor() {
+    this.level = 1;
+    this.hp = 100;
+  }
+
+  save() {
+    return new Memento({ level: this.level, hp: this.hp });
+  }
+
+  restore(memento) {
+    const { level, hp } = memento.getState();
+    this.level = level;
+    this.hp = hp;
+  }
+
+  play() {
+    this.level++;
+    this.hp -= 10;
+    console.log(`Level: ${this.level}, HP: ${this.hp}`);
+  }
+}
+
+class GameHistory {
+  constructor() {
+    this.saves = [];
+  }
+  add(memento) { this.saves.push(memento); }
+  get(index) { return this.saves[index]; }
+}
+
+// Usage
+const game = new Game();
+const history = new GameHistory();
+
+game.play(); // L2 HP90
+history.add(game.save());
+
+game.play(); // L3 HP80
+history.add(game.save());
+
+game.play(); // L4 HP70
+
+game.restore(history.get(1));
+console.log(`Restored → Level ${game.level}, HP ${game.hp}`);
+
+
+✅ Commonly used in games for checkpoints and “save game” systems.
+
+Example 3 — Redux-Style Time Travel 🕰️
+class Store {
+  constructor(state) {
+    this.state = state;
+    this.history = [JSON.parse(JSON.stringify(state))];
+  }
+
+  setState(newState) {
+    this.state = { ...this.state, ...newState };
+    this.history.push(JSON.parse(JSON.stringify(this.state)));
+  }
+
+  undo() {
+    if (this.history.length > 1) {
+      this.history.pop();
+      this.state = this.history[this.history.length - 1];
+    }
+  }
+
+  getState() {
+    return this.state;
+  }
+}
+
+// Usage
+const store = new Store({ count: 0 });
+store.setState({ count: 1 });
+store.setState({ count: 2 });
+store.setState({ count: 3 });
+console.log(store.getState()); // {count: 3}
+store.undo();
+console.log(store.getState()); // {count: 2}
+
+
+✅ Same idea — snapshots of state stored over time, enabling undo.
+
+---------------------------------------------------------------------------------
+
+🧩 Example 1 — Basic JavaScript Example
+// Originator
+class Editor {
+  constructor() {
+    this.content = ""
+  }
+
+  type(words) {
+    this.content += " " + words
+  }
+
+  save() {
+    return new Memento(this.content)
+  }
+
+  restore(memento) {
+    this.content = memento.getContent()
+  }
+
+  getContent() {
+    return this.content
+  }
+}
+
+// Memento
+class Memento {
+  constructor(content) {
+    this._content = content
+  }
+
+  getContent() {
+    return this._content
+  }
+}
+
+// Caretaker
+class History {
+  constructor() {
+    this.stack = []
+  }
+
+  push(memento) {
+    this.stack.push(memento)
+  }
+
+  pop() {
+    return this.stack.pop()
+  }
+}
+
+// Usage
+const editor = new Editor()
+const history = new History()
+
+editor.type("Hello")
+history.push(editor.save())
+
+editor.type("World")
+history.push(editor.save())
+
+editor.type("Again")
+
+console.log(editor.getContent()) // "Hello World Again"
+
+editor.restore(history.pop()) // Undo
+console.log(editor.getContent()) // "Hello World"
+
+editor.restore(history.pop()) // Undo again
+console.log(editor.getContent()) // "Hello"
+
+
+✅ Each snapshot (memento) preserves the editor state.
+✅ You can undo changes without exposing internal editor logic.
+
+🧩 Example 2 — React + Redux Toolkit Example (Undo Feature)
+
+Redux state history is a real-world Memento system.
+
+🧠 Simplified Memento Logic
+const history = {
+  past: [],
+  present: null,
+  future: [],
+}
+
+function saveState(state) {
+  history.past.push(structuredClone(state))
+  history.present = state
+}
+
+function undo() {
+  const prev = history.past.pop()
+  if (prev) history.present = prev
+}
+
+⚛️ In React/Redux
+import { createSlice } from "@reduxjs/toolkit"
+
+const initialState = { text: "", history: [] }
+
+const editorSlice = createSlice({
+  name: "editor",
+  initialState,
+  reducers: {
+    type: (state, action) => {
+      state.history.push(state.text)
+      state.text += " " + action.payload
+    },
+    undo: (state) => {
+      if (state.history.length > 0) {
+        state.text = state.history.pop()
+      }
+    },
+  },
+})
+
+export const { type, undo } = editorSlice.actions
+export default editorSlice.reducer
+
+
+✅ Each change saves a “memento” in the history array.
+✅ Undo restores the last saved state — identical to the Memento Pattern behavior.
+
+🧩 Example 3 — Node.js API Example (Configuration Snapshots)
+
+Imagine you have a system that allows rolling back config updates.
+
+class Config {
+  constructor() {
+    this.settings = {}
+  }
+
+  update(key, value) {
+    this.settings[key] = value
+  }
+
+  save() {
+    return JSON.parse(JSON.stringify(this.settings)) // snapshot
+  }
+
+  restore(snapshot) {
+    this.settings = snapshot
+  }
+}
+
+const history = []
+const config = new Config()
+
+config.update("theme", "dark")
+history.push(config.save())
+
+config.update("theme", "light")
+console.log(config.settings) // { theme: "light" }
+
+config.restore(history.pop())
+console.log(config.settings) // { theme: "dark" }
+
+
+✅ Useful for systems that need rollback or audit-trail support.
+
+⚙️ Use Cases
+
+👉 Undo / Redo systems (text editors, drawing tools, IDEs)
+👉 Game checkpoints or save/load functionality
+👉 Versioning and rollback (configuration or documents)
+👉 Browser session restore or state history management
+
+| Use Case                   | Example                                    |
+| -------------------------- | ------------------------------------------ |
+| **Undo/Redo systems**      | Text editors, graphics tools, spreadsheets |
+| **Form editing**           | Save snapshots before user edits           |
+| **Configuration rollback** | Revert to previous app or DB config        |
+| **Version control**        | Store object snapshots (like commits)      |
+| **Redux state history**    | Time-travel debugging (Redux DevTools)     |
+
+
+✅ Benefits
+
+👉 Restores previous state easily
+👉 Preserves encapsulation — internal details remain private
+👉 Simplifies undo/redo or rollback logic
+👉 Works naturally with other patterns (Command, State)
+👉 Provides undo/redo functionality easily.
+👉 Keeps object state encapsulated.
+👉 Makes rollback and snapshot recovery clean and testable.
+
+⚠️ Cons
+
+👉 Can consume a lot of memory for large states
+👉 Managing and pruning old snapshots may be necessary
+👉 Complex when states are deeply interconnected
+
+📘 Takeaways
+
+👉 Memento = snapshot + restore ability
+👉 Great for undo/redo or history tracking
+👉 Keeps originator self-contained — no external code peeks inside
+👉 Combine with Command pattern for full undoable actions
+
+💡 Think of it like:
+“A save point for an object’s internal state — a time machine in OOP form.”
+
+
+🧠 Summary
+
+👉 Memento Pattern = take and restore snapshots of an object’s state.
+👉 Core components:
+Originator → object whose state is saved
+Memento → snapshot of state
+Caretaker → manages memento storage
+
+👉 Perfect for undo/redo, state history, and rollback systems in React, Redux, or Node.js.
+
+
+
+#####################################################################################
+
+⚖️ Command vs Memento Pattern
+| 🔹 Aspect              | 🧩 **Command Pattern**                                | 🧩 **Memento Pattern**                             |
+| ---------------------- | ----------------------------------------------------- | -------------------------------------------------- |
+| 💡 **Purpose**         | Encapsulates an **action (behavior)** as an object    | Captures an **object’s state (data)** as an object |
+| 🧠 **Focus**           | *What to do* (execute, undo, redo)                    | *What the state was* before or after doing it      |
+| ⚙️ **Encapsulates**    | A **method call** and its parameters                  | A **snapshot of data/state**                       |
+| 🔁 **Undo Mechanism**  | Reverses an action (calls `undo()` logic)             | Restores a previous snapshot (reverts state)       |
+| 🧩 **Participants**    | - Command <br> - Receiver <br> - Invoker              | - Originator <br> - Memento <br> - Caretaker       |
+| 💬 **Analogy**         | A remote control button (“Do this action”)            | A photo album (“Restore me to that moment”)        |
+| 🔄 **Reversing Logic** | Each command defines how to undo itself               | State is simply replaced with a previous snapshot  |
+| 🧰 **Usage Together**  | Commands may store Mementos to implement undo history | Mementos are often created by Commands             |
+
+
+💡 Example — Undo with Command + Memento Together
+Step 1 — Command pattern alone
+class TextEditor {
+  constructor() {
+    this.content = "";
+  }
+  type(words) {
+    this.content += words;
+  }
+  erase(count) {
+    this.content = this.content.slice(0, -count);
+  }
+  getContent() {
+    return this.content;
+  }
+}
+
+class WriteCommand {
+  constructor(editor, text) {
+    this.editor = editor;
+    this.text = text;
+  }
+  execute() {
+    this.editor.type(this.text);
+  }
+  undo() {
+    this.editor.erase(this.text.length);
+  }
+}
+
+
+✅ This works for specific actions — you can undo “type” because you know what you did.
+
+But what if you want to undo any kind of change (not just type)? That’s where Memento comes in.
+
+Step 2 — Add Memento for Generic Undo
+class Memento {
+  constructor(state) {
+    this.state = state;
+  }
+  getState() {
+    return this.state;
+  }
+}
+
+class Editor {
+  constructor() {
+    this.content = "";
+  }
+  type(words) {
+    this.content += words;
+  }
+  save() {
+    return new Memento(this.content);
+  }
+  restore(memento) {
+    this.content = memento.getState();
+  }
+  getContent() {
+    return this.content;
+  }
+}
+
+class CommandManager {
+  constructor(editor) {
+    this.editor = editor;
+    this.history = [];
+  }
+  execute(action) {
+    this.history.push(this.editor.save()); // 📸 save memento before action
+    action();
+  }
+  undo() {
+    const memento = this.history.pop();
+    if (memento) this.editor.restore(memento);
+  }
+}
+
+// Usage
+const editor = new Editor();
+const manager = new CommandManager(editor);
+
+manager.execute(() => editor.type("Hello "));
+manager.execute(() => editor.type("World!"));
+console.log(editor.getContent()); // Hello World!
+
+manager.undo();
+console.log(editor.getContent()); // Hello
+
+
+✅ The Command controls when actions happen,
+✅ The Memento captures what state existed before or after.
+
+
+| Concept                        | Description                                                                            |
+| ------------------------------ | -------------------------------------------------------------------------------------- |
+| **Command**                    | “Do this operation.” Encapsulates behavior.                                            |
+| **Memento**                    | “Remember this moment.” Encapsulates state.                                            |
+| **Command + Memento together** | “Do this operation — but remember what it looked like before, so I can undo it later.” |
+
+🧠 Relationship
+
+You can implement undo with Command only (if each command knows how to reverse itself).
+
+You can implement undo with Memento only (by saving snapshots).
+
+But the best systems use both — Commands handle behavior, Mementos store data snapshots.
+
+📘 Takeaways
+
+👉 Command = behavior
+👉 Memento = snapshot
+👉 Both often coexist in editors, games, and workflow systems
+👉 Command calls = “change the world”
+👉 Memento = “time travel back”
+
+*/
