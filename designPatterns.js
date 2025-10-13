@@ -12,9 +12,9 @@ Module  -> DONE
 
 🔹 Structural Patterns
 Proxy -> DONE
-Adapter
-Decorator
-Composite
+Adapter -> DONE
+Decorator -> DONE
+Composite -> DONE
 Bridge
 Flyweight
 Facade
@@ -2761,5 +2761,816 @@ console.log(modernPayment.pay(100)) // Legacy payment of 100
 👉 Keep adapters thin and simple — just translate the interface, not the logic
 👉 Combine well with patterns like Facade (to simplify interfaces) and Decorator (to extend behavior)
 
+
+*/
+
+
+
+
+/* 
+
+📖 Definition
+
+👉 The Decorator Pattern allows you to add new behaviors or responsibilities to an object dynamically, without modifying its existing class.
+You “wrap” an object inside another object that adds extra features — like gift wrapping 🎁.
+
+
+🧠 Key Ideas
+
+👉 Used to extend object behavior at runtime, not compile-time
+👉 Follows the Open/Closed Principle — open for extension, closed for modification
+👉 Avoids deep inheritance trees
+👉 Multiple decorators can wrap the same object in layers
+👉 Works great with composition over inheritance
+
+🧠 Key Idea
+
+Decorators extend behavior by wrapping an existing object.
+Multiple decorators can be stacked (chained).
+The original object doesn’t need to know it’s being decorated.
+
+⚙️ Real-world Analogy
+
+Think of a coffee shop order system ☕:
+Base object → “Plain Coffee”
+Decorators → “Add Milk”, “Add Sugar”, “Add Caramel”
+Each decorator adds something new but keeps the same interface (getCost(), getDescription()).
+
+
+--------------------------------------------------------------------------------------------
+
+💡 Examples
+Example 1 — Basic Coffee Example ☕
+class Coffee {
+  cost() {
+    return 5;
+  }
+}
+
+// Decorators
+function withMilk(coffee) {
+  const cost = coffee.cost();
+  coffee.cost = () => cost + 2;
+  return coffee;
+}
+
+function withSugar(coffee) {
+  const cost = coffee.cost();
+  coffee.cost = () => cost + 1;
+  return coffee;
+}
+
+// Usage
+let myCoffee = new Coffee();
+myCoffee = withMilk(myCoffee);
+myCoffee = withSugar(myCoffee);
+
+console.log(myCoffee.cost()); // 8
+
+
+✅ Adds milk and sugar dynamically without changing the Coffee class.
+
+Example 2 — Logging Decorator 🧾
+function logExecution(fn) {
+  return function(...args) {
+    console.log(`Calling ${fn.name} with`, args);
+    const result = fn(...args);
+    console.log(`Result:`, result);
+    return result;
+  };
+}
+
+function multiply(a, b) {
+  return a * b;
+}
+
+const loggedMultiply = logExecution(multiply);
+loggedMultiply(3, 4);
+
+
+✅ Adds logging behavior to any function dynamically.
+
+Example 3 — UI Component Decorator 🎨
+class Component {
+  render() {
+    console.log("Rendering base component");
+  }
+}
+
+class BorderDecorator {
+  constructor(component) {
+    this.component = component;
+  }
+  render() {
+    this.component.render();
+    console.log("Adding border");
+  }
+}
+
+class ShadowDecorator {
+  constructor(component) {
+    this.component = component;
+  }
+  render() {
+    this.component.render();
+    console.log("Adding shadow");
+  }
+}
+
+// Usage
+let component = new Component();
+component = new BorderDecorator(component);
+component = new ShadowDecorator(component);
+
+component.render();
+
+
+✅ Decorators stack and extend behavior in layers.
+
+Example 4 — Middleware Decorator in Express-Style 🛠️
+function authMiddleware(handler) {
+  return (req) => {
+    if (!req.user) throw new Error("Unauthorized");
+    return handler(req);
+  };
+}
+
+function logMiddleware(handler) {
+  return (req) => {
+    console.log("Request received:", req.url);
+    return handler(req);
+  };
+}
+
+function baseHandler(req) {
+  return `Hello ${req.user}`;
+}
+
+// Apply decorators
+let handler = baseHandler;
+handler = authMiddleware(handler);
+handler = logMiddleware(handler);
+
+// Test
+const req = { url: "/home", user: "Hesham" };
+console.log(handler(req));
+
+
+✅ Similar to how Express middleware or Redux enhancers work.
+
+Example 5 — Class Decorator (ESNext Proposal) 🧱
+function readonly(target, key, descriptor) {
+  descriptor.writable = false;
+  return descriptor;
+}
+
+class Car {
+  @readonly
+  brand = "Tesla";
+}
+
+const myCar = new Car();
+myCar.brand = "BMW"; // Error in strict mode
+
+
+✅ Example using decorator syntax (still experimental in JS).
+
+---------------------------------------------------------------------------------
+
+🧩 Example 1 — Simple JS Example
+// Base component
+class Coffee {
+  cost() {
+    return 5
+  }
+  description() {
+    return "Plain Coffee"
+  }
+}
+
+// Decorators
+class MilkDecorator {
+  constructor(coffee) {
+    this.coffee = coffee
+  }
+  cost() {
+    return this.coffee.cost() + 2
+  }
+  description() {
+    return this.coffee.description() + ", Milk"
+  }
+}
+
+class SugarDecorator {
+  constructor(coffee) {
+    this.coffee = coffee
+  }
+  cost() {
+    return this.coffee.cost() + 1
+  }
+  description() {
+    return this.coffee.description() + ", Sugar"
+  }
+}
+
+// Usage
+let myCoffee = new Coffee()
+myCoffee = new MilkDecorator(myCoffee)
+myCoffee = new SugarDecorator(myCoffee)
+
+console.log(myCoffee.description()) // ☕ Plain Coffee, Milk, Sugar
+console.log(myCoffee.cost())        // 💵 8
+
+
+✅ We added functionality (milk, sugar) without changing the Coffee class.
+
+🧩 Example 2 — React-style Example: Higher-Order Components (HOC)
+
+In React, the Decorator Pattern appears naturally as HOCs — components that wrap others to add extra behavior.
+
+Example: withLogger
+function withLogger(Component) {
+  return function (props) {
+    console.log(`🔍 Rendering ${Component.name}`)
+    return <Component {...props} />
+  }
+}
+
+function Button({ label }) {
+  return <button>{label}</button>
+}
+
+const LoggedButton = withLogger(Button)
+
+// Usage
+<LoggedButton label="Click Me" />
+
+
+✅ withLogger decorates Button by adding logging.
+✅ You didn’t modify Button — just wrapped it.
+
+🧩 Example 3 — Redux Middleware as Decorators
+
+Redux middlewares act as decorators around dispatch.
+Each middleware wraps the dispatch function and enhances it (e.g., logging, async handling).
+
+const loggerMiddleware = (store) => (next) => (action) => {
+  console.log("🚀 Dispatching:", action)
+  const result = next(action)
+  console.log("📦 Next state:", store.getState())
+  return result
+}
+
+
+✅ Each middleware wraps the dispatch process → classic Decorator Pattern in functional form.
+
+--------------------------------------------------------------------------------------------------
+
+⚙️ Use Cases
+
+👉 Add functionality like logging, validation, caching, or retrying to functions
+👉 Enhance UI components (borders, colors, animations)
+👉 Extend network requests (e.g., add auth headers, retry logic)
+👉 Create middleware-like behaviors in frameworks
+👉 Add analytics or metrics to existing APIs
+
+| Use Case                    | Example                                                          |
+| --------------------------- | ---------------------------------------------------------------- |
+| **UI Enhancements**         | Wrap React components to add styles, animations, logging         |
+| **Cross-cutting concerns**  | Add logging, caching, validation without touching core logic     |
+| **Middleware systems**      | Redux, Express.js middlewares, etc.                              |
+| **Dynamic feature toggles** | Wrap existing services or components with extra logic at runtime |
+| **Performance monitoring**  | Decorate API calls or UI updates for analytics                   |
+
+
+✅ Benefits
+
+👉 Extends functionality without modifying original code
+👉 Allows dynamic and flexible composition of behaviors
+👉 Reusable, modular, and testable code
+👉 Encourages cleaner, smaller core classes
+👉 Adds functionality without subclassing.
+👉 Keeps classes small and focused.
+👉 Enables dynamic and composable behaviors.
+👉 Promotes open/closed principle (open for extension, closed for modification).
+
+⚠️ Cons
+
+👉 Can lead to many small wrappers (layering confusion)
+👉 Debugging call chains can be harder
+👉 Requires discipline to avoid decorator “overload”
+
+📘 Takeaways
+
+👉 Decorator = “Wrapper” that adds features dynamically
+👉 Perfect when you need conditional or pluggable behaviors
+👉 Works great with functional programming and higher-order functions
+👉 Keep decorators simple, pure, and composable
+
+
+🧠 Summary
+
+👉 Decorator Pattern = dynamically wrap an object to add or modify behavior.
+👉 In React, this shows up as Higher-Order Components (HOCs) or middlewares.
+👉 Promotes flexibility, reusability, and clean architecture.
+
+*/
+
+
+/* 
+
+⚖️ Decorator vs Mixin Pattern
+
+| 🔹 Aspect                | 🧩 **Decorator Pattern**                                          | 🧩 **Mixin Pattern**                                                                  |
+| ------------------------ | ----------------------------------------------------------------- | ------------------------------------------------------------------------------------- |
+| 💡 **Goal**              | Add *extra behavior* to a **specific object instance** at runtime | Add *shared behavior* to **multiple classes or objects** at definition time           |
+| 🕒 **When applied**      | At **runtime** (you wrap an existing instance)                    | At **class creation time** (you merge or extend functionality)                        |
+| ⚙️ **How it works**      | Wraps an existing object and intercepts or extends its behavior   | Copies or merges properties/methods into a class prototype or object                  |
+| 🧠 **Key Concept**       | *Object wrapping* (composition)                                   | *Property mixing* (augmentation)                                                      |
+| 🧩 **Modification Type** | Non-intrusive — doesn’t change the class                          | Intrusive — changes the prototype or object directly                                  |
+| 📦 **Use Case Example**  | Add logging, validation, caching, retry logic dynamically         | Add utility or shared methods like `serialize()`, `clone()`, etc. to multiple classes |
+| 🧰 **Example Analogy**   | Putting extra layers of clothing on someone                       | Giving everyone in a group a new skill                                                |
+
+Decorator 🧱
+class User {
+  save() {
+    console.log("Saving user");
+  }
+}
+
+// Decorator adds logging to one instance
+function logDecorator(user) {
+  const originalSave = user.save;
+  user.save = function() {
+    console.log("Before save");
+    originalSave.call(this);
+    console.log("After save");
+  };
+  return user;
+}
+
+const user1 = logDecorator(new User());
+user1.save(); // logs before & after
+
+
+✅ Decorator affects only that instance, not all Users.
+
+Mixin 🧬
+const LoggerMixin = {
+  log(message) {
+    console.log(`[LOG]: ${message}`);
+  }
+};
+
+class User {}
+Object.assign(User.prototype, LoggerMixin);
+
+const user1 = new User();
+const user2 = new User();
+
+user1.log("Hello"); // Works for all users
+user2.log("Hi");    // Shared behavior
+
+
+✅ Mixin augments the class itself — every instance gets the new method.
+
+*/
+
+
+
+
+/* 
+
+🧩 Definition
+
+The Composite Pattern lets you treat individual objects and groups of objects uniformly.
+It organizes objects into tree structures (like folders, menus, or UI components) where composite (container) objects hold leaf (single) objects, 
+but both share the same interface.
+
+It represents part-whole hierarchies, so that a single object (a “leaf”) and a group of objects (a “composite”) can be handled using the same interface.
+
+🧠 Real-world Analogy
+
+Think of a folder structure on your computer 💻:
+A file is a leaf node — it can’t contain other files.
+A folder is a composite node — it can contain files or other folders.
+Yet, both have the same operations (e.g., open(), delete(), rename()).
+
+⚙️ Key Points
+
+👉 Treat single objects and collections the same way.
+👉 Usually involves a base class (or interface) that both leaves and composites extend.
+👉 The composite holds references to children.
+
+🧠 Key Ideas
+
+👉 Treat a single object (leaf) and a collection of objects (composite) the same way
+👉 Commonly used for hierarchical structures (tree-like data)
+👉 Follows the Recursive Composition principle
+👉 Allows you to add, remove, or execute actions on both single items and groups in a unified way
+
+💡 Examples
+Example 1 — File System 📂
+// Component
+class FileSystemItem {
+  constructor(name) {
+    this.name = name;
+  }
+  display(indent = 0) {}
+}
+
+// Leaf
+class File extends FileSystemItem {
+  display(indent = 0) {
+    console.log(`${' '.repeat(indent)}📄 ${this.name}`);
+  }
+}
+
+// Composite
+class Folder extends FileSystemItem {
+  constructor(name) {
+    super(name);
+    this.children = [];
+  }
+  add(item) {
+    this.children.push(item);
+  }
+  remove(item) {
+    this.children = this.children.filter((child) => child !== item);
+  }
+  display(indent = 0) {
+    console.log(`${' '.repeat(indent)}📁 ${this.name}`);
+    this.children.forEach((child) => child.display(indent + 2));
+  }
+}
+
+// Usage
+const root = new Folder("Root");
+const images = new Folder("Images");
+const docs = new Folder("Docs");
+
+images.add(new File("photo.png"));
+docs.add(new File("cv.pdf"));
+root.add(images);
+root.add(docs);
+root.display();
+
+
+✅ Both files and folders share the same interface — you can display() either.
+
+Example 2 — UI Components 🧱
+class UIComponent {
+  render() {}
+}
+
+class Button extends UIComponent {
+  render() {
+    console.log("Render Button");
+  }
+}
+
+class Text extends UIComponent {
+  render() {
+    console.log("Render Text");
+  }
+}
+
+class Container extends UIComponent {
+  constructor() {
+    super();
+    this.children = [];
+  }
+  add(component) {
+    this.children.push(component);
+  }
+  render() {
+    console.log("Render Container");
+    this.children.forEach((child) => child.render());
+  }
+}
+
+// Usage
+const page = new Container();
+page.add(new Text());
+page.add(new Button());
+page.render();
+
+
+✅ Perfect example for React-like component trees.
+
+Example 3 — Menu System 🍔
+class MenuItem {
+  constructor(name, price = 0) {
+    this.name = name;
+    this.price = price;
+  }
+  getPrice() {
+    return this.price;
+  }
+}
+
+class Menu extends MenuItem {
+  constructor(name) {
+    super(name);
+    this.items = [];
+  }
+  add(item) {
+    this.items.push(item);
+  }
+  getPrice() {
+    return this.items.reduce((sum, item) => sum + item.getPrice(), 0);
+  }
+}
+
+// Usage
+const burger = new MenuItem("Burger", 10);
+const fries = new MenuItem("Fries", 5);
+const lunchCombo = new Menu("Lunch Combo");
+lunchCombo.add(burger);
+lunchCombo.add(fries);
+
+console.log(lunchCombo.getPrice()); // 15
+
+
+✅ Combines multiple menu items into one composite meal.
+
+
+🧩 Example 1 — Basic JS Example
+// Component (base interface)
+class Graphic {
+  draw() {}
+}
+
+// Leaf
+class Circle extends Graphic {
+  draw() {
+    console.log("⚪ Drawing a Circle")
+  }
+}
+
+class Square extends Graphic {
+  draw() {
+    console.log("⬛ Drawing a Square")
+  }
+}
+
+// Composite
+class Drawing extends Graphic {
+  constructor() {
+    super()
+    this.children = []
+  }
+
+  add(child) {
+    this.children.push(child)
+  }
+
+  draw() {
+    console.log("🖼️ Drawing composed elements:")
+    this.children.forEach(child => child.draw())
+  }
+}
+
+// Usage
+const circle = new Circle()
+const square = new Square()
+
+const drawing = new Drawing()
+drawing.add(circle)
+drawing.add(square)
+
+drawing.draw()
+
+
+✅ You can call draw() on Circle, Square, or Drawing — they all respond the same way.
+
+🧩 Example 2 — React Component Tree (Conceptual)
+
+React’s component hierarchy is a real-life example of the Composite Pattern.
+Each component can contain other components, yet both are rendered the same way via render().
+
+function Leaf({ text }) {
+  return <li>{text}</li>
+}
+
+function Group({ items }) {
+  return (
+    <ul>
+      {items.map((item, i) =>
+        typeof item === "string" ? <Leaf key={i} text={item} /> : <Group key={i} items={item} />
+      )}
+    </ul>
+  )
+}
+
+// Usage
+const data = ["Task 1", ["Subtask 1.1", "Subtask 1.2"], "Task 2"]
+<Group items={data} />
+
+
+✅ Leaf and Group both use the same interface (React component).
+✅ React’s recursive render model is essentially a Composite Pattern in action.
+
+🧩 Example 3 — File System Example
+class FileSystemItem {
+  constructor(name) {
+    this.name = name
+  }
+  display(indent = 0) {}
+}
+
+class File extends FileSystemItem {
+  display(indent = 0) {
+    console.log(`${" ".repeat(indent)}📄 ${this.name}`)
+  }
+}
+
+class Folder extends FileSystemItem {
+  constructor(name) {
+    super(name)
+    this.children = []
+  }
+
+  add(item) {
+    this.children.push(item)
+  }
+
+  display(indent = 0) {
+    console.log(`${" ".repeat(indent)}📁 ${this.name}`)
+    this.children.forEach(child => child.display(indent + 2))
+  }
+}
+
+// Usage
+const root = new Folder("root")
+const docs = new Folder("docs")
+const img = new Folder("images")
+
+docs.add(new File("resume.pdf"))
+docs.add(new File("notes.txt"))
+img.add(new File("logo.png"))
+
+root.add(docs)
+root.add(img)
+
+root.display()
+
+
+✅ Output shows a full hierarchy with folders and files rendered identically using .display().
+
+
+
+
+⚙️ Use Cases
+
+👉 File/folder systems
+👉 UI component trees
+👉 Menu structures (menus, submenus, items)
+👉 Organization hierarchies (manager → employees)
+👉 Scene graphs (3D objects, game engines)
+👉 DOM elements (each node can contain child nodes)
+
+| Use Case                      | Example                                     |
+| ----------------------------- | ------------------------------------------- |
+| **UI components**             | React tree, menu systems, dashboards        |
+| **File systems**              | Directory & file management                 |
+| **Organization hierarchy**    | Departments, teams, employees               |
+| **Scene graphs / 3D objects** | Nodes and sub-objects (e.g., in Three.js)   |
+| **Game objects**              | Parent-child relationships between entities |
+
+
+✅ Benefits
+
+👉 Uniform treatment of simple and complex objects
+👉 Simplifies client code — no need to check for object type
+👉 Easy to extend (add new types of components)
+👉 Enables powerful recursive operations
+👉 Simplifies code that deals with hierarchies.
+👉 Enables recursion naturally.
+👉 Makes adding new node types easy.
+👉 Promotes uniform treatment of single and composite objects.
+
+⚠️ Cons
+
+👉 Can make system overly general and complex
+👉 Harder to restrict structure rules (e.g., prevent adding folders inside files)
+👉 Can make debugging tree logic tricky
+
+📘 Takeaways
+
+👉 Think of Composite as a tree structure where everything behaves the same way
+👉 Perfect for nested data or recursive rendering
+👉 Follow the rule: “treat individual and composite objects uniformly”
+👉 Often used internally in frameworks like React, DOM, and Scene Graphs
+
+🧠 Summary
+
+👉 Composite Pattern = treat single objects and groups the same way.
+👉 Great for tree-like structures.
+👉 Used in React component trees, file systems, and organizational hierarchies.
+
+*/
+
+
+
+
+/* 
+
+The Composite Pattern and the Registry Pattern can look alike because both involve managing collections of objects — but their intent and behavior are quite different. Let’s break down the distinction clearly 👇
+
+⚖️ Composite vs Registry Pattern
+| 🔹 Aspect              | 🧩 **Composite Pattern**                                                                                    | 🧩 **Registry Pattern**                                                                                                            |
+| ---------------------- | ----------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
+| 💡 **Purpose**         | Represent a **tree hierarchy** where individual (leaf) and grouped (composite) objects are treated the same | Maintain a **centralized lookup table** (like a dictionary or service container) for storing and retrieving objects by name or key |
+| 🧠 **Core Idea**       | *Part–Whole Hierarchy* — objects can contain other objects of the same type                                 | *Global Directory* — a single access point for multiple instances                                                                  |
+| 🏗️ **Structure**      | Recursive — each composite can have children that can themselves be composites                              | Flat — a simple collection or map of named objects                                                                                 |
+| ⚙️ **Operations**      | Apply the same operation (e.g., render, execute) recursively to all children                                | Retrieve, register, or unregister instances (no recursive behavior)                                                                |
+| 🧩 **Example Analogy** | A folder that contains files and subfolders                                                                 | A phonebook mapping names to numbers                                                                                               |
+| 📦 **Typical Methods** | `add()`, `remove()`, `operation()` (recursive traversal)                                                    | `register()`, `get()`, `unregister()` (key-value management)                                                                       |
+
+
+💡 Example Comparison
+Composite Pattern 🧱 (Tree)
+class Component {
+  operation() {}
+}
+
+class Leaf extends Component {
+  operation() {
+    console.log("Leaf operation");
+  }
+}
+
+class Composite extends Component {
+  constructor() {
+    super();
+    this.children = [];
+  }
+  add(child) {
+    this.children.push(child);
+  }
+  operation() {
+    this.children.forEach(child => child.operation());
+  }
+}
+
+const root = new Composite();
+const branch = new Composite();
+branch.add(new Leaf());
+root.add(branch);
+root.add(new Leaf());
+root.operation();
+
+
+✅ Recursive — calling operation() on root triggers it for all children.
+
+Registry Pattern 🗃️ (Lookup)
+class ServiceRegistry {
+  constructor() {
+    this.services = new Map();
+  }
+  register(name, instance) {
+    this.services.set(name, instance);
+  }
+  get(name) {
+    return this.services.get(name);
+  }
+  unregister(name) {
+    this.services.delete(name);
+  }
+}
+
+// Usage
+const registry = new ServiceRegistry();
+registry.register("logger", { log: msg => console.log(msg) });
+registry.register("db", { connect: () => console.log("Connected") });
+
+registry.get("logger").log("Hello");
+registry.get("db").connect();
+
+
+✅ Flat storage — no hierarchy, just key-based access.
+
+🧩 Use Cases
+
+👉 Composite Pattern
+🖐 UI component trees
+🖐 File/folder systems
+🖐 Game entity hierarchies
+🖐 Organization or scene graphs
+
+👉 Registry Pattern
+🖐 Dependency injection containers
+🖐 Plugin or module registration
+🖐 Singleton or factory managers
+🖐 Service discovery and lookups
+
+📘 Takeaways
+
+👉 Composite = Structure (hierarchical organization of objects)
+👉 Registry = Access (central lookup of existing objects)
+
+👉 Composite solves “How do I treat parts and wholes the same?”
+👉 Registry solves “How do I find or manage my objects globally?”
 
 */
