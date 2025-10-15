@@ -28,11 +28,11 @@ Command  -> DONE
 Iterator  -> DONE
 State  -> DONE
 Memento  -> DONE
-Template Method
-Chain of Responsibility
-Mediator
-Visitor
-Interpreter
+Template Method  -> DONE
+Chain of Responsibility  -> DONE
+Mediator  -> DONE
+Visitor  -> DONE
+Interpreter  -> DONE
 
 */
 
@@ -6811,5 +6811,2137 @@ But the best systems use both — Commands handle behavior, Mementos store data 
 👉 Both often coexist in editors, games, and workflow systems
 👉 Command calls = “change the world”
 👉 Memento = “time travel back”
+
+*/
+
+
+
+/* 
+
+Template Method Pattern defines the skeleton of an algorithm in a base class 
+but lets subclasses override certain steps of that algorithm without changing its overall structure.
+“Define the steps of a process once, and let subclasses fill in the blanks.”
+
+🧠 Key Ideas
+
+👉 Common steps are implemented in the base (abstract) class
+👉 Variable steps are left as “hooks” or abstract methods
+👉 Ensures consistent structure while allowing customization
+👉 Promotes code reuse and enforces a process template
+
+
+👉 The Template Method Pattern defines the skeleton of an algorithm in a base class (the “template”), but allows subclasses to override specific steps of that algorithm without changing its overall structure.
+
+🧠 Real-world Analogy
+
+Think of a coffee machine ☕ —
+The steps are always the same:
+1️⃣ Boil water
+2️⃣ Brew drink
+3️⃣ Pour into cup
+4️⃣ Add extras (like milk or sugar)
+
+Each drink (coffee, tea, hot chocolate) customizes only the “brew” and “extras” steps.
+
+⚙️ Key Points
+
+👉 The base class defines the structure (template) of an operation.
+👉 The subclasses redefine or extend certain steps.
+👉 Ensures the overall algorithm stays consistent.
+
+💡 Examples
+Example 1 — Data Parser Example 📄
+class DataParser {
+  parse() {
+    this.readData();
+    this.processData();
+    this.saveData();
+  }
+
+  readData() {
+    console.log("Reading data from file...");
+  }
+
+  // to be implemented by subclasses
+  processData() {
+    throw new Error("processData() must be implemented");
+  }
+
+  saveData() {
+    console.log("Saving processed data...");
+  }
+}
+
+class CSVParser extends DataParser {
+  processData() {
+    console.log("Processing CSV data...");
+  }
+}
+
+class JSONParser extends DataParser {
+  processData() {
+    console.log("Processing JSON data...");
+  }
+}
+
+// Usage
+new CSVParser().parse();
+new JSONParser().parse();
+
+
+✅ Both parsers follow the same sequence — read → process → save —
+but define their own processData() step.
+
+Example 2 — Payment Template 💳
+class PaymentProcessor {
+  pay(amount) {
+    this.validate();
+    this.debit(amount);
+    this.sendReceipt();
+  }
+
+  validate() {
+    console.log("Validating payment info...");
+  }
+
+  debit(amount) {
+    throw new Error("debit() must be implemented");
+  }
+
+  sendReceipt() {
+    console.log("Receipt sent to user.");
+  }
+}
+
+class CreditCardPayment extends PaymentProcessor {
+  debit(amount) {
+    console.log(`Charging ${amount} to credit card.`);
+  }
+}
+
+class PayPalPayment extends PaymentProcessor {
+  debit(amount) {
+    console.log(`Transferring ${amount} via PayPal.`);
+  }
+}
+
+new CreditCardPayment().pay(100);
+new PayPalPayment().pay(200);
+
+
+✅ Shared structure, different implementations of the debit step.
+
+Example 3 — Game Lifecycle 🎮
+class Game {
+  start() {
+    this.initialize();
+    this.mainLoop();
+    this.end();
+  }
+
+  initialize() {
+    console.log("Setting up game...");
+  }
+
+  mainLoop() {
+    throw new Error("mainLoop() must be implemented");
+  }
+
+  end() {
+    console.log("Game over!");
+  }
+}
+
+class ChessGame extends Game {
+  mainLoop() {
+    console.log("Playing chess...");
+  }
+}
+
+class RacingGame extends Game {
+  mainLoop() {
+    console.log("Racing cars...");
+  }
+}
+
+new ChessGame().start();
+new RacingGame().start();
+
+
+✅ The structure (start → loop → end) never changes — only the internal gameplay differs.
+
+
+-------------------------------------
+
+🧩 Example 1 — Simple JavaScript Example
+class Beverage {
+  prepareRecipe() {
+    this.boilWater()
+    this.brew()
+    this.pourInCup()
+    this.addCondiments()
+  }
+
+  boilWater() {
+    console.log("🔥 Boiling water")
+  }
+
+  pourInCup() {
+    console.log("☕ Pouring into cup")
+  }
+
+  // Methods to be overridden
+  brew() {}
+  addCondiments() {}
+}
+
+class Tea extends Beverage {
+  brew() {
+    console.log("🫖 Steeping the tea")
+  }
+
+  addCondiments() {
+    console.log("🍋 Adding lemon")
+  }
+}
+
+class Coffee extends Beverage {
+  brew() {
+    console.log("☕ Dripping coffee through filter")
+  }
+
+  addCondiments() {
+    console.log("🥛 Adding sugar and milk")
+  }
+}
+
+// Usage
+const tea = new Tea()
+tea.prepareRecipe()
+
+const coffee = new Coffee()
+coffee.prepareRecipe()
+
+
+✅ Both drinks share the same preparation template, but define different details for brewing and condiments.
+
+🧩 Example 2 — React + Redux Toolkit Example
+
+Imagine you have multiple API fetching flows — all follow the same process:
+1️⃣ Validate input
+2️⃣ Fetch data
+3️⃣ Transform data
+4️⃣ Save to Redux
+
+You can define a template for this process:
+
+class DataFetcher {
+  async fetchAndStore(dispatch) {
+    this.validate()
+    const data = await this.fetch()
+    const transformed = this.transform(data)
+    dispatch(this.save(transformed))
+  }
+
+  validate() { throw "Not implemented" }
+  fetch() { throw "Not implemented" }
+  transform(data) { return data }
+  save(data) { throw "Not implemented" }
+}
+
+🎯 Concrete implementations
+class UsersFetcher extends DataFetcher {
+  validate() { console.log("✅ Validating user filters") }
+  async fetch() { return fetch("/api/users").then(r => r.json()) }
+  save(data) { return { type: "users/set", payload: data } }
+}
+
+class OrdersFetcher extends DataFetcher {
+  validate() { console.log("✅ Validating order filters") }
+  async fetch() { return fetch("/api/orders").then(r => r.json()) }
+  transform(data) { return data.map(o => ({ ...o, total: o.price * o.qty })) }
+  save(data) { return { type: "orders/set", payload: data } }
+}
+
+// Usage
+const userFetcher = new UsersFetcher()
+userFetcher.fetchAndStore(dispatch)
+
+
+✅ The template ensures all fetching flows are consistent,
+✅ while subclasses customize details (validation, transformation, reducer action).
+
+🧩 Example 3 — Node.js Example (Task Workflow)
+class Task {
+  execute() {
+    this.before()
+    this.run()
+    this.after()
+  }
+
+  before() { console.log("🛠️ Preparing...") }
+  run() { throw "Must override run()" }
+  after() { console.log("✅ Finished!") }
+}
+
+class FileUploadTask extends Task {
+  run() { console.log("📤 Uploading file...") }
+}
+
+class DataCleanupTask extends Task {
+  run() { console.log("🧹 Cleaning data...") }
+}
+
+// Usage
+new FileUploadTask().execute()
+new DataCleanupTask().execute()
+
+
+✅ Each subclass defines its core logic while keeping a unified process (before → run → after).
+
+
+⚙️ Use Cases
+
+👉 Frameworks or libraries that define a reusable workflow skeleton
+👉 Base classes for processing, loading, exporting, or validating data
+👉 Game engines and application lifecycles
+👉 UI component lifecycles (initialize → render → cleanup)
+👉 Data pipelines (extract → transform → load)
+
+| Use Case               | Example                                                           |
+| ---------------------- | ----------------------------------------------------------------- |
+| **Web frameworks**     | Base controller class defines request handling template           |
+| **Build systems**      | Common build steps with overridable hooks (e.g., Webpack plugins) |
+| **React data layers**  | Base service or hook defines flow; subclasses specialize API      |
+| **Games or workflows** | Common game loop / lifecycle methods                              |
+| **Testing frameworks** | Setup → Execute → Teardown sequences                              |
+
+
+✅ Benefits
+
+👉 Avoids code duplication by reusing the base workflow
+👉 Keeps algorithm structure consistent
+👉 Encourages extension via subclassing rather than modification
+👉 Maintains the Open/Closed Principle (open for extension, closed for modification)
+👉 Promotes code reuse and consistency.
+👉 Enforces a clear workflow structure.
+👉 Allows controlled extension points.
+👉 Reduces duplicate “algorithm skeletons.”
+
+⚠️ Cons
+
+👉 Relies on inheritance (less flexible than composition)
+👉 Changes in the base class can impact all subclasses
+👉 Can become rigid if overused for small workflows
+
+📘 Takeaways
+
+👉 Template Method = shared skeleton + customizable steps
+👉 Perfect for defining consistent workflows with variable parts
+👉 Encourages reuse, standardization, and controlled extension
+👉 Commonly used in frameworks, SDKs, and abstract base classes
+
+🧠 Summary
+
+👉 Template Method Pattern = define an algorithm skeleton in a base class and let subclasses override specific steps.
+👉 Ensures a consistent process while allowing customization.
+👉 Great for workflows, pipelines, data fetching flows, and shared lifecycle logic in React, Node, or backend services.
+
+
+*/
+
+
+
+
+
+/* 
+
+
+The Chain of Responsibility Pattern lets you pass a request along a chain of handlers,
+where each handler decides either to process the request or pass it to the next handler.
+
+“Let multiple objects handle a request, without the sender needing to know which one will actually handle it.”
+
+
+🧠 Real-world Analogy
+
+Imagine a customer support system 🎧:
+The first-level agent tries to solve your issue.
+If it’s too complex, they escalate to a manager.
+If still unresolved, it goes to the director.
+Each level decides — handle or pass along.
+
+⚙️ Key Points
+
+👉 Decouples sender and receiver of a request.
+👉 Promotes flexibility — new handlers can be added easily.
+👉 Each handler only knows the next one in the chain.
+
+
+
+🧠 Key Ideas
+
+👉 Avoids coupling a sender to a specific receiver
+👉 Forms a chain (or pipeline) of potential handlers
+👉 Each handler either handles the request or passes it along
+👉 Common in event systems, loggers, middlewares, and validation flows
+
+💡 Examples
+Example 1 — Support Request Escalation 🧰
+class SupportHandler {
+  setNext(handler) {
+    this.next = handler;
+    return handler; // enables chaining
+  }
+
+  handle(request) {
+    if (this.next) {
+      return this.next.handle(request);
+    }
+    console.log("No one could handle the request.");
+  }
+}
+
+class Level1Support extends SupportHandler {
+  handle(request) {
+    if (request.type === "simple") {
+      console.log("Level 1 handled the request.");
+    } else {
+      super.handle(request);
+    }
+  }
+}
+
+class Level2Support extends SupportHandler {
+  handle(request) {
+    if (request.type === "complex") {
+      console.log("Level 2 handled the request.");
+    } else {
+      super.handle(request);
+    }
+  }
+}
+
+class Level3Support extends SupportHandler {
+  handle(request) {
+    if (request.type === "critical") {
+      console.log("Level 3 handled the request.");
+    } else {
+      super.handle(request);
+    }
+  }
+}
+
+// Setup chain
+const l1 = new Level1Support();
+const l2 = new Level2Support();
+const l3 = new Level3Support();
+l1.setNext(l2).setNext(l3);
+
+// Usage
+l1.handle({ type: "simple" });
+l1.handle({ type: "complex" });
+l1.handle({ type: "critical" });
+l1.handle({ type: "unknown" });
+
+
+✅ Each handler tries; if it can’t, it passes the request onward.
+
+Example 2 — Logging System 🧾
+class Logger {
+  setNext(nextLogger) {
+    this.next = nextLogger;
+    return nextLogger;
+  }
+
+  log(level, message) {
+    if (this.next) this.next.log(level, message);
+  }
+}
+
+class InfoLogger extends Logger {
+  log(level, message) {
+    if (level === "info") console.log("Info:", message);
+    super.log(level, message);
+  }
+}
+
+class ErrorLogger extends Logger {
+  log(level, message) {
+    if (level === "error") console.error("Error:", message);
+    super.log(level, message);
+  }
+}
+
+class CriticalLogger extends Logger {
+  log(level, message) {
+    if (level === "critical") console.error("CRITICAL:", message.toUpperCase());
+    super.log(level, message);
+  }
+}
+
+// Chain
+const logger = new InfoLogger();
+logger.setNext(new ErrorLogger()).setNext(new CriticalLogger());
+
+// Usage
+logger.log("info", "System started");
+logger.log("error", "Failed to connect");
+logger.log("critical", "Database corrupted");
+
+
+✅ Each logger handles messages at its level, but others can still receive it.
+
+Example 3 — Express.js Middleware Analogy 🌐
+
+If you’ve ever used Express or Koa — you’ve already used this pattern.
+
+function authMiddleware(req, next) {
+  if (!req.user) console.log("Unauthorized");
+  else next();
+}
+
+function logMiddleware(req, next) {
+  console.log(`Request from ${req.user}`);
+  next();
+}
+
+function dataMiddleware(req, next) {
+  console.log("Processing data for", req.user);
+}
+
+function runChain(middlewares, req) {
+  let index = 0;
+  function next() {
+    const middleware = middlewares[index++];
+    if (middleware) middleware(req, next);
+  }
+  next();
+}
+
+// Usage
+runChain([authMiddleware, logMiddleware, dataMiddleware], { user: "Hesham" });
+
+
+✅ Each middleware decides to stop or pass the request along — a direct Chain of Responsibility implementation.
+
+----------------------------------------------------------------------------
+
+🧩 Example 1 — Basic JavaScript Example
+class Handler {
+  setNext(handler) {
+    this.next = handler
+    return handler
+  }
+
+  handle(request) {
+    if (this.next) {
+      return this.next.handle(request)
+    }
+    console.log("❌ No handler could process:", request)
+  }
+}
+
+// Concrete Handlers
+class AuthHandler extends Handler {
+  handle(request) {
+    if (!request.user) {
+      console.log("🚫 Auth failed: user missing")
+      return
+    }
+    console.log("✅ Auth success")
+    return super.handle(request)
+  }
+}
+
+class ValidationHandler extends Handler {
+  handle(request) {
+    if (!request.data || !request.data.name) {
+      console.log("🚫 Validation failed: name required")
+      return
+    }
+    console.log("✅ Validation passed")
+    return super.handle(request)
+  }
+}
+
+class LoggingHandler extends Handler {
+  handle(request) {
+    console.log("🪵 Logging request:", request)
+    return super.handle(request)
+  }
+}
+
+// Usage
+const auth = new AuthHandler()
+const validation = new ValidationHandler()
+const logging = new LoggingHandler()
+
+auth.setNext(validation).setNext(logging)
+
+auth.handle({ user: "Hesham", data: { name: "Order" } })
+
+
+✅ Each handler checks something, and only calls the next if successful.
+✅ You can easily add, remove, or reorder handlers.
+
+🧩 Example 2 — React + Redux Toolkit Example (Middleware Style)
+
+Redux middleware is an implementation of the Chain of Responsibility Pattern.
+
+Each middleware can:
+
+Handle the action.
+
+Pass it to the next middleware.
+
+const loggerMiddleware = store => next => action => {
+  console.log("🪵 Action:", action.type)
+  return next(action)
+}
+
+const authMiddleware = store => next => action => {
+  if (action.meta?.requiresAuth && !store.getState().user.loggedIn) {
+    console.log("🚫 Blocked unauthorized action")
+    return
+  }
+  return next(action)
+}
+
+const errorMiddleware = store => next => action => {
+  try {
+    return next(action)
+  } catch (err) {
+    console.error("💥 Error caught:", err)
+  }
+}
+
+
+✅ Each middleware can act or pass — same logic as a handler chain.
+✅ Perfect for logging, authorization, validation, etc.
+
+🧩 Example 3 — Express.js Middleware
+
+Express request handlers are also Chain of Responsibility in action.
+
+function auth(req, res, next) {
+  if (!req.headers.authorization) return res.status(401).send("Unauthorized")
+  next()
+}
+
+function validate(req, res, next) {
+  if (!req.body.name) return res.status(400).send("Name required")
+  next()
+}
+
+function handler(req, res) {
+  res.send("✅ Success!")
+}
+
+app.post("/create", auth, validate, handler)
+
+
+✅ Each middleware decides to stop or continue the chain using next().
+
+⚙️ Use Cases
+
+👉 Event handling or message propagation systems
+👉 Middleware pipelines (Express.js, Koa, Redux middleware)
+👉 Validation or filtering chains
+👉 Security/authentication layers
+👉 Logging and audit trails
+👉 Workflow approval systems
+| Use Case                 | Example                                  |
+| ------------------------ | ---------------------------------------- |
+| **Middleware pipelines** | Redux, Express, Koa, NestJS              |
+| **Validation chains**    | Multiple validation steps before saving  |
+| **Security checks**      | Auth → Role → Permission checks          |
+| **Logging / Auditing**   | Layered logging before and after actions |
+| **Support escalation**   | Tier 1 → Tier 2 → Tier 3 handling        |
+| **Workflow pipelines**   | Each step processes or passes data       |
+
+
+✅ Benefits
+
+👉 Decouples sender from receiver(s)
+👉 Easy to add, remove, or reorder handlers
+👉 Promotes Single Responsibility — each handler focuses on one concern
+👉 Clean and flexible structure for sequential processing
+👉 Avoids large if...else or switch blocks.
+👉 Makes systems open for extension but closed for modification.
+👉 Easy to reorder or add new handlers.
+👉 Decouples sender from receiver logic.
+
+
+⚠️ Cons
+
+👉 No guarantee that a request will be handled
+👉 Debugging can be harder if many handlers exist
+👉 Improper chain setup can cause skipped or infinite loops
+
+📘 Takeaways
+
+👉 Chain of Responsibility = Linked pipeline of handlers
+👉 Each handler decides: “Handle or pass?”
+👉 Excellent for middleware, validations, and workflows
+👉 Encourages open/closed principle — add new handlers without changing others
+
+💡 Think of it like:
+“A relay race — each runner (handler) decides whether to finish or pass the baton.”
+
+🧠 Summary
+
+👉 Chain of Responsibility Pattern = a chain of handlers that process or pass a request.
+👉 The sender doesn’t know which handler will handle it.
+👉 Used in middlewares, pipelines, event systems, and validations.
+👉 Core pattern behind Redux middlewares and Express middlewares.
+*/
+
+
+
+/* 
+
+Mediator Pattern defines an object (the mediator) that controls communication between multiple objects,
+so they don’t communicate directly but instead through the mediator.
+
+“Instead of objects talking to each other directly — they talk through a mediator.”
+
+🧠 Real-world Analogy
+
+Think of an air traffic controller ✈️:
+Planes don’t talk to each other directly.
+Each plane reports to the control tower (mediator).
+The tower coordinates all communication to prevent collisions.
+That’s exactly how a mediator works — it’s a communication hub.
+
+⚙️ Key Points
+
+👉 Objects (called colleagues) don’t communicate directly.
+👉 They use a mediator to send and receive messages.
+👉 The mediator coordinates logic between all parties.
+
+
+🧠 Key Ideas
+
+👉 Reduces direct dependencies between objects
+👉 Centralizes communication logic in one place
+👉 Promotes loose coupling between components
+👉 Prevents “spaghetti” of bidirectional references and event listeners
+
+💡 Examples
+Example 1 — Chatroom Example 💬
+class ChatRoom {
+  showMessage(user, message) {
+    const time = new Date().toLocaleTimeString();
+    console.log(`${time} [${user.getName()}]: ${message}`);
+  }
+}
+
+class User {
+  constructor(name, chatRoom) {
+    this.name = name;
+    this.chatRoom = chatRoom;
+  }
+  getName() {
+    return this.name;
+  }
+  send(message) {
+    this.chatRoom.showMessage(this, message);
+  }
+}
+
+// Usage
+const chat = new ChatRoom();
+const user1 = new User("Hesham", chat);
+const user2 = new User("Omar", chat);
+
+user1.send("Hello Omar!");
+user2.send("Hey Hesham!");
+
+
+✅ The users don’t talk directly — they communicate via the ChatRoom mediator.
+
+Example 2 — Air Traffic Control ✈️
+class AirTrafficControl {
+  constructor() {
+    this.planes = [];
+  }
+
+  register(plane) {
+    this.planes.push(plane);
+    plane.setMediator(this);
+  }
+
+  notify(sender, message) {
+    this.planes.forEach(plane => {
+      if (plane !== sender) {
+        plane.receive(message);
+      }
+    });
+  }
+}
+
+class Airplane {
+  constructor(name) {
+    this.name = name;
+  }
+  setMediator(mediator) {
+    this.mediator = mediator;
+  }
+  send(message) {
+    console.log(`${this.name} sending: ${message}`);
+    this.mediator.notify(this, message);
+  }
+  receive(message) {
+    console.log(`${this.name} received: ${message}`);
+  }
+}
+
+// Usage
+const tower = new AirTrafficControl();
+const p1 = new Airplane("Flight 101");
+const p2 = new Airplane("Flight 202");
+tower.register(p1);
+tower.register(p2);
+
+p1.send("Requesting landing clearance");
+
+
+✅ The planes never communicate directly — the tower (mediator) coordinates everything.
+
+Example 3 — React / UI Form Mediator 🧾
+class FormMediator {
+  constructor() {
+    this.components = {};
+  }
+
+  register(name, component) {
+    this.components[name] = component;
+    component.setMediator(this);
+  }
+
+  notify(sender, event) {
+    if (event === "usernameChanged") {
+      this.components["submitButton"].setEnabled(sender.value.length > 0);
+    }
+  }
+}
+
+class InputField {
+  constructor(name) {
+    this.name = name;
+    this.value = "";
+  }
+  setMediator(mediator) {
+    this.mediator = mediator;
+  }
+  setValue(value) {
+    this.value = value;
+    this.mediator.notify(this, "usernameChanged");
+  }
+}
+
+class Button {
+  setMediator(mediator) {
+    this.mediator = mediator;
+  }
+  setEnabled(enabled) {
+    console.log(`Button is ${enabled ? "enabled" : "disabled"}`);
+  }
+}
+
+// Usage
+const mediator = new FormMediator();
+const username = new InputField("username");
+const button = new Button();
+
+mediator.register("username", username);
+mediator.register("submitButton", button);
+
+username.setValue("");       // Button disabled
+username.setValue("Hesham"); // Button enabled
+
+
+✅ The input doesn’t know about the button — the mediator coordinates their interaction.
+
+---------------------------------------------------------------
+
+🧩 Example 2 — React Example (Component Coordination)
+
+Suppose you have a dashboard where different widgets (filters, charts, tables) interact.
+Instead of components updating each other directly, they use a mediator hook.
+
+import { useState } from "react"
+
+function useMediator() {
+  const [state, setState] = useState({ filter: "", data: [] })
+
+  return {
+    state,
+    updateFilter: (filter) => {
+      console.log("🔄 Filter updated:", filter)
+      setState((s) => ({ ...s, filter }))
+    },
+    updateData: (data) => {
+      console.log("📊 Data updated")
+      setState((s) => ({ ...s, data }))
+    },
+  }
+}
+
+// Components
+function Filter({ mediator }) {
+  return (
+    <input
+      placeholder="Filter..."
+      onChange={(e) => mediator.updateFilter(e.target.value)}
+    />
+  )
+}
+
+function Chart({ mediator }) {
+  return <div>📈 Showing data for: {mediator.state.filter}</div>
+}
+
+function Dashboard() {
+  const mediator = useMediator()
+  return (
+    <div>
+      <Filter mediator={mediator} />
+      <Chart mediator={mediator} />
+    </div>
+  )
+}
+
+
+✅ Components don’t communicate directly — all interaction happens through the mediator hook.
+✅ Perfect for component coordination without prop drilling chaos.
+
+🧩 Example 3 — Redux Toolkit Example 
+
+The Redux store itself often acts as a mediator between different parts of your app.
+Actions (like messages) are dispatched, and slices (colleagues) respond as needed.
+
+To implement a custom mediator layer:
+
+class EventMediator {
+  constructor() {
+    this.handlers = {}
+  }
+
+  subscribe(event, handler) {
+    if (!this.handlers[event]) this.handlers[event] = []
+    this.handlers[event].push(handler)
+  }
+
+  publish(event, data) {
+    if (this.handlers[event]) {
+      this.handlers[event].forEach((handler) => handler(data))
+    }
+  }
+}
+
+// Usage
+const mediator = new EventMediator()
+
+mediator.subscribe("USER_LOGIN", (user) => console.log("👤 Welcome", user))
+mediator.subscribe("USER_LOGIN", () => console.log("🔐 Start session"))
+
+mediator.publish("USER_LOGIN", "Hesham")
+
+
+✅ All communication flows through the mediator — no component directly depends on another.
+
+######################################################################################################
+IMPORTANT NOTE 
+
+the EventMediator with subscribe() and publish()) looks exactly like the Observer Pattern, not the true Mediator Pattern.
+Let’s clear up the confusion 🔍
+
+🧠 The Difference Between Mediator and Observer
+👉 Observer Pattern
+
+Core idea: One-to-many dependency.
+Focus: Notification and subscription mechanism.
+Objects (observers) subscribe to one subject, and when that subject changes, all observers get notified.
+The subject doesn’t know or coordinate how observers use the data — it just broadcasts.
+✅ Example keywords: subscribe, unsubscribe, notify, emit, publish.
+🧩 Used for: Event emitters, Redux store updates, RxJS streams, DOM event listeners.
+
+👉 Mediator Pattern
+Core idea: Central coordination of logic between multiple objects.
+Focus: Orchestration — the mediator controls communication, not just forwards messages.
+Objects don’t just “observe” — they ask the mediator to perform coordinated actions involving others.
+✅ Example keywords: send, notify, coordinate, handleRequest.
+🧩 Used for: Chat rooms, form validation flows, UI component coordination, game object management.
+
+
+
+| Aspect               | **Observer**               | **Mediator**                        |
+| -------------------- | -------------------------- | ----------------------------------- |
+| Communication type   | One-to-many (broadcast)    | Many-to-many (central coordination) |
+| Focus                | Event propagation          | Behavior coordination               |
+| Example              | `EventEmitter`, RxJS       | Chat system, UI control center      |
+| Coupling             | Loose but indirect         | Centralized and explicit            |
+| Real-world analogies | News publisher/subscribers | Air traffic control tower           |
+
+
+######################################################################################################
+
+✅ Correct Mediator Example — Real Communication Control
+
+Here’s a true Mediator Pattern that controls communication logic:
+
+class Mediator {
+  constructor() {
+    this.components = {}
+  }
+
+  register(name, component) {
+    this.components[name] = component
+    component.mediator = this
+  }
+
+  notify(sender, event, data) {
+    if (event === "USER_LOGGED_IN") {
+      this.components["dashboard"].loadUser(data)
+      this.components["navbar"].updateUser(data)
+    }
+
+    if (event === "USER_LOGGED_OUT") {
+      this.components["dashboard"].clear()
+      this.components["navbar"].reset()
+    }
+  }
+}
+
+class Component {
+  constructor(name) {
+    this.name = name
+    this.mediator = null
+  }
+
+  send(event, data) {
+    this.mediator.notify(this, event, data)
+  }
+}
+
+// Concrete Components
+class Navbar extends Component {
+  updateUser(user) {
+    console.log(`🔐 Navbar updated for ${user.name}`)
+  }
+  reset() {
+    console.log("🚪 Navbar reset (logged out)")
+  }
+}
+
+class Dashboard extends Component {
+  loadUser(user) {
+    console.log(`📊 Loading dashboard for ${user.name}`)
+  }
+  clear() {
+    console.log("🧹 Dashboard cleared")
+  }
+}
+
+// Usage
+const mediator = new Mediator()
+const navbar = new Navbar("navbar")
+const dashboard = new Dashboard("dashboard")
+
+mediator.register("navbar", navbar)
+mediator.register("dashboard", dashboard)
+
+navbar.send("USER_LOGGED_IN", { name: "Hesham" })
+navbar.send("USER_LOGGED_OUT")
+
+
+✅ Here the Mediator (controller) decides what happens when a component triggers an event
+✅ The components don’t know each other — only the mediator knows the orchestration logic
+✅ This is the true Mediator Pattern
+
+| Feature            | **Observer Pattern**                        | **Mediator Pattern**                        |
+| ------------------ | ------------------------------------------- | ------------------------------------------- |
+| Communication type | One-to-many (publish/subscribe)             | Many-to-many (via central controller)       |
+| Control flow       | Decentralized (observers act independently) | Centralized (mediator coordinates behavior) |
+| Responsibility     | Notify listeners                            | Decide what happens next                    |
+| Example            | EventEmitter, RxJS                          | UI controller, ChatRoom, FormManager        |
+| Coupling           | Loose but scattered                         | Centralized and controlled                  |
+
+
+
+---------------------------------------------------
+✅ Correct Implementation Using React Hooks (Idiomatic Version)
+
+We’ll build a true Mediator pattern using React Context.
+Here, the Mediator lives as a React component that coordinates the state of its children.
+
+🧱 1. Create the Mediator Context
+import React, { createContext, useContext, useState } from "react"
+
+const FormMediatorContext = createContext()
+
+export function useMediator() {
+  return useContext(FormMediatorContext)
+}
+
+export function FormMediatorProvider({ children }) {
+  const [email, setEmail] = useState("")
+  const [password, setPassword] = useState("")
+
+  const isValid = email.includes("@") && password.length >= 6
+
+  const mediator = {
+    email,
+    password,
+    setEmail,
+    setPassword,
+    isValid,
+  }
+
+  return (
+    <FormMediatorContext.Provider value={mediator}>
+      {children}
+    </FormMediatorContext.Provider>
+  )
+}
+
+
+✅ This acts as our Mediator — it holds the state and the validation logic.
+✅ Components will “talk” to the mediator using the context (not directly to each other).
+
+🧩 2. Independent Components
+function EmailInput() {
+  const { email, setEmail } = useMediator()
+  return (
+    <div>
+      <label>Email:</label>
+      <input
+        type="email"
+        value={email}
+        onChange={(e) => setEmail(e.target.value)}
+      />
+    </div>
+  )
+}
+
+function PasswordInput() {
+  const { password, setPassword } = useMediator()
+  return (
+    <div>
+      <label>Password:</label>
+      <input
+        type="password"
+        value={password}
+        onChange={(e) => setPassword(e.target.value)}
+      />
+    </div>
+  )
+}
+
+function SubmitButton() {
+  const { isValid } = useMediator()
+  return (
+    <button disabled={!isValid} onClick={() => alert("✅ Submitted!")}>
+      Login
+    </button>
+  )
+}
+
+
+✅ Each component is completely independent.
+✅ They don’t know about each other — only about the mediator context.
+✅ When one updates the state, React automatically re-renders any component that depends on it.
+
+🧩 3. The Parent (Mediator Wiring)
+export default function LoginForm() {
+  return (
+    <FormMediatorProvider>
+      <div style={{ width: 300, margin: "auto" }}>
+        <h2>🔐 Mediator Login</h2>
+        <EmailInput />
+        <PasswordInput />
+        <SubmitButton />
+      </div>
+    </FormMediatorProvider>
+  )
+}
+
+
+✅ The provider wraps the children, acting as the central mediator.
+✅ All communication goes through the context, not directly between components.
+
+| Concept                                    | Role                                                                      |
+| ------------------------------------------ | ------------------------------------------------------------------------- |
+| **Mediator (Context Provider)**            | Holds the central logic and coordinates state changes.                    |
+| **Colleagues (Input & Button components)** | Report changes to the mediator and react to mediator updates.             |
+| **React’s state system**                   | Automatically re-renders components that consume changed mediator values. |
+
+
+⚙️ Use Cases
+
+👉 Chat systems (users don’t communicate directly)
+👉 UI components coordination (input affects button, etc.)
+👉 Messaging/event systems inside applications
+👉 Air traffic control, smart home systems, or multiplayer games
+👉 Centralized controllers for decoupled modules
+| Use Case                         | Example                                             |
+| -------------------------------- | --------------------------------------------------- |
+| **Chat systems**                 | Central room (mediator) manages user messages       |
+| **React component coordination** | Dashboard components communicating indirectly       |
+| **Event-driven systems**         | Mediator distributes messages between modules       |
+| **Game engines**                 | Central controller manages object interactions      |
+| **Redux / Pub-Sub**              | Store mediates between actions and reducers         |
+| **Form wizard**                  | Central controller coordinates steps and validation |
+
+
+
+✅ Benefits
+
+👉 Reduces tight coupling between classes
+👉 Centralizes complex communication logic
+👉 Easier to maintain, extend, and test
+👉 Promotes reusability of components
+👉 Reduces direct coupling between objects.
+👉 Makes system easier to modify and extend.
+👉 Simplifies maintenance — all communication is centralized.
+👉 Promotes cleaner, decoupled architectures.
+
+
+⚠️ Cons
+
+👉 The Mediator can grow too large (become a “God Object”)
+👉 Harder to track logic when too many components depend on one mediator
+👉 May introduce performance overhead in high-frequency systems
+
+📘 Takeaways
+
+👉 Mediator = central hub for communication
+👉 Keeps components independent and reusable
+👉 Excellent for UI systems, event buses, and workflow orchestration
+👉 Common in frameworks like React, Angular, and Redux (via central store or dispatcher)
+
+💡 Think of it like:
+
+“Instead of everyone shouting across the room — they whisper to the coordinator, and the coordinator decides who should hear it.”
+
+🧠 Summary
+
+👉 Mediator Pattern = centralize communication between multiple objects.
+👉 Prevents tangled dependencies and circular updates.
+👉 Great for React component communication, Redux-like event flows, and message-based systems.
+👉 Often overlaps with Pub/Sub and Event Emitter concepts.
+
+*/
+
+
+/* 
+
+Visitor Pattern lets you add new operations to existing object structures without changing the classes of the objects being operated on.
+Instead, it moves the operation logic into a separate Visitor object.
+
+“Separate the algorithm from the objects it operates on.”
+
+👉 The Visitor Pattern lets you add new operations to a group of related objects without modifying their structure or classes.
+It does this by separating the operation (the visitor) from the data structure (the elements being visited).
+
+🧠 Real-world Analogy
+
+Think of a customs officer at an airport 🛄:
+Different passengers (citizen, tourist, diplomat) have different document types.
+The officer (visitor) checks all passengers — but each passenger decides how they’re inspected.
+You can add new “visitors” later (e.g., a health inspector) without changing passenger classes.
+
+⚙️ Key Points
+
+👉 Separate the algorithm (visitor) from the data (elements).
+👉 Each element “accepts” a visitor and lets it act according to its type.
+👉 Makes adding new operations easy — without editing existing classes.
+
+🧠 Key Ideas
+
+👉 Each element (object) accepts a visitor and calls its corresponding method.
+👉 The visitor implements different logic for each element type.
+👉 Makes it easy to add new operations, but not new element types.
+👉 Keeps element classes focused on structure, not behavior.
+
+💡 Examples
+Example 1 — Document Elements 📝
+// Element Interface
+class DocumentPart {
+  accept(visitor) {}
+}
+
+// Concrete Elements
+class Text extends DocumentPart {
+  constructor(content) {
+    super();
+    this.content = content;
+  }
+  accept(visitor) {
+    visitor.visitText(this);
+  }
+}
+
+class Image extends DocumentPart {
+  constructor(url) {
+    super();
+    this.url = url;
+  }
+  accept(visitor) {
+    visitor.visitImage(this);
+  }
+}
+
+// Visitor Interface
+class Visitor {
+  visitText(text) {}
+  visitImage(image) {}
+}
+
+// Concrete Visitors
+class HtmlExportVisitor extends Visitor {
+  visitText(text) {
+    console.log(`<p>${text.content}</p>`);
+  }
+  visitImage(image) {
+    console.log(`<img src="${image.url}" />`);
+  }
+}
+
+class PlainTextVisitor extends Visitor {
+  visitText(text) {
+    console.log(text.content);
+  }
+  visitImage(image) {
+    console.log(`[Image: ${image.url}]`);
+  }
+}
+
+// Usage
+const documentParts = [
+  new Text("Hello world!"),
+  new Image("image.png")
+];
+
+const htmlExporter = new HtmlExportVisitor();
+const textExporter = new PlainTextVisitor();
+
+documentParts.forEach(part => part.accept(htmlExporter));
+documentParts.forEach(part => part.accept(textExporter));
+
+
+✅ The document structure stays unchanged — only visitors (operations) vary.
+
+Example 2 — File System Visitor 📁
+class File {
+  constructor(name, size) {
+    this.name = name;
+    this.size = size;
+  }
+  accept(visitor) {
+    visitor.visitFile(this);
+  }
+}
+
+class Folder {
+  constructor(name, items = []) {
+    this.name = name;
+    this.items = items;
+  }
+  accept(visitor) {
+    visitor.visitFolder(this);
+  }
+}
+
+class SizeCalculatorVisitor {
+  constructor() {
+    this.totalSize = 0;
+  }
+  visitFile(file) {
+    this.totalSize += file.size;
+  }
+  visitFolder(folder) {
+    folder.items.forEach(item => item.accept(this));
+  }
+}
+
+const folder = new Folder("root", [
+  new File("a.txt", 5),
+  new File("b.txt", 10),
+  new Folder("sub", [new File("c.txt", 20)])
+]);
+
+const sizeCalculator = new SizeCalculatorVisitor();
+folder.accept(sizeCalculator);
+console.log("Total size:", sizeCalculator.totalSize);
+
+
+✅ The visitor traverses the structure and computes total size without changing File or Folder classes.
+
+Example 3 — Tax Calculation Example 💰
+class Food {
+  constructor(price) { this.price = price; }
+  accept(visitor) { visitor.visitFood(this); }
+}
+
+class Electronics {
+  constructor(price) { this.price = price; }
+  accept(visitor) { visitor.visitElectronics(this); }
+}
+
+class TaxVisitor {
+  visitFood(food) {
+    console.log(`Food Tax: ${food.price * 0.05}`);
+  }
+  visitElectronics(elec) {
+    console.log(`Electronics Tax: ${elec.price * 0.15}`);
+  }
+}
+
+const items = [new Food(100), new Electronics(1000)];
+const taxCalc = new TaxVisitor();
+
+items.forEach(item => item.accept(taxCalc));
+
+
+✅ You can later add another visitor, e.g., DiscountVisitor, without touching these classes.
+
+----------------------------------------------------------------------------------------------------
+
+🧩 Example 1 — Basic JavaScript Example
+// Visitor
+class Visitor {
+  visitCircle(circle) {}
+  visitRectangle(rect) {}
+}
+
+// Concrete Elements
+class Circle {
+  constructor(radius) {
+    this.radius = radius
+  }
+
+  accept(visitor) {
+    visitor.visitCircle(this)
+  }
+}
+
+class Rectangle {
+  constructor(width, height) {
+    this.width = width
+    this.height = height
+  }
+
+  accept(visitor) {
+    visitor.visitRectangle(this)
+  }
+}
+
+// Concrete Visitor: Area Calculator
+class AreaCalculator extends Visitor {
+  visitCircle(circle) {
+    console.log(`⚪ Circle area: ${Math.PI * circle.radius ** 2}`)
+  }
+
+  visitRectangle(rect) {
+    console.log(`⬛ Rectangle area: ${rect.width * rect.height}`)
+  }
+}
+
+// Usage
+const shapes = [new Circle(5), new Rectangle(3, 4)]
+const areaVisitor = new AreaCalculator()
+
+shapes.forEach(shape => shape.accept(areaVisitor))
+
+
+✅ You can add new visitors (e.g., PerimeterCalculator) without touching the shape classes.
+✅ The shapes know how to be visited, not what the visitor does.
+
+🧩 Example 2 — Adding a New Visitor (Perimeter Calculation)
+class PerimeterCalculator extends Visitor {
+  visitCircle(circle) {
+    console.log(`⚪ Circle perimeter: ${2 * Math.PI * circle.radius}`)
+  }
+
+  visitRectangle(rect) {
+    console.log(`⬛ Rectangle perimeter: ${2 * (rect.width + rect.height)}`)
+  }
+}
+
+const perimeterVisitor = new PerimeterCalculator()
+shapes.forEach(shape => shape.accept(perimeterVisitor))
+
+
+✅ Added a new operation without modifying Circle or Rectangle.
+
+🧩 Example 3 — React Example: Rendering Different UI Elements
+
+Let’s say you have multiple object types (TextNode, ImageNode, VideoNode) and want to render them dynamically.
+
+class TextNode {
+  constructor(text) { this.text = text }
+  accept(visitor) { return visitor.visitText(this) }
+}
+
+class ImageNode {
+  constructor(src) { this.src = src }
+  accept(visitor) { return visitor.visitImage(this) }
+}
+
+class VideoNode {
+  constructor(url) { this.url = url }
+  accept(visitor) { return visitor.visitVideo(this) }
+}
+
+class ReactRenderVisitor {
+  visitText(node) { return <p>{node.text}</p> }
+  visitImage(node) { return <img src={node.src} alt="" /> }
+  visitVideo(node) { return <video src={node.url} controls /> }
+}
+
+// usage
+const nodes = [
+  new TextNode("Hello"),
+  new ImageNode("/logo.png"),
+  new VideoNode("/intro.mp4")
+]
+
+const visitor = new ReactRenderVisitor()
+function Renderer() {
+  return <>{nodes.map((n, i) => <div key={i}>{n.accept(visitor)}</div>)}</>
+}
+
+
+✅ Each node defines how to “accept” a visitor.
+✅ You can add a new visitor (e.g., PlainTextVisitor) to export all nodes as plain text — without editing the node classes.
+
+⚙️ Use Cases
+
+👉 When you need to perform different operations on a structure of objects without changing their classes
+👉 Compilers and syntax trees (e.g., evaluating, printing, optimizing)
+👉 Reporting systems (e.g., exporting data in different formats)
+👉 File systems (calculating size, generating structure reports)
+👉 Games (applying effects to entities without changing entity logic)
+| Use Case              | Example                                                     |
+| --------------------- | ----------------------------------------------------------- |
+| **Code analysis**     | AST visitors (used in Babel, ESLint, compilers)             |
+| **Serialization**     | Export objects to JSON, XML, or HTML                        |
+| **Rendering**         | React/Canvas rendering systems                              |
+| **Reporting systems** | Apply different report generators on the same data          |
+| **File processing**   | Traverse file structures and perform operations dynamically |
+
+
+✅ Benefits
+
+👉 Adds new operations without touching existing classes
+👉 Keeps object classes clean and focused
+👉 Encourages open/closed principle (open for extension, closed for modification)
+👉 Ideal for object structures with many operation types
+👉 Add new operations without changing existing classes.
+👉 Clean separation between data structures and algorithms.
+👉 Great for complex object hierarchies.
+
+⚠️ Cons
+
+👉 Hard to add new element types — each visitor must handle them
+👉 Can lead to tight coupling between visitors and element structure
+👉 More boilerplate (each element must have an accept() method)
+
+📘 Takeaways
+
+👉 Visitor = Separate operation logic from object structure
+👉 Great when you have many operations but stable object types
+👉 You can add new visitors easily, but adding new elements is harder
+👉 Widely used in AST traversal, report generators, and object serialization
+
+💡 Think of it like:
+
+“You’re visiting a museum — each exhibit (object) stays the same,
+but each visitor (algorithm) experiences it differently.”
+
+🧠 Summary
+
+👉 Visitor Pattern = separate operations (visitors) from data structures (elements).
+👉 Each element accepts a visitor, allowing it to perform type-specific work.
+👉 Ideal when you have a stable set of element types but want to add new operations easily.
+👉 Common in compilers, ASTs, React renderers, and reporting engines.
+
+*/
+
+
+
+/* 
+Mixin, Decorator, and Visitor can look similar because all three involve adding behavior to existing objects —
+but they’re conceptually and structurally different in what they extend, how they extend it, and when.
+
+Let’s compare them clearly 👇
+
+| 🔹 Aspect                   | 🧬 **Mixin**                                                | 🎁 **Decorator**                                                       | 🧭 **Visitor**                                                                      |
+| --------------------------- | ----------------------------------------------------------- | ---------------------------------------------------------------------- | ----------------------------------------------------------------------------------- |
+| 💡 **Purpose**              | Share or reuse common functionality across multiple classes | Add or modify behavior **dynamically** for a specific object           | Add **new operations** to a structure of objects **without changing their classes** |
+| 🧠 **Core Idea**            | *Composition by copying methods*                            | *Wrapping an object to extend behavior*                                | *Externalizing operations from the object hierarchy*                                |
+| 🕒 **When Applied**         | At **definition time** (before object is created)           | At **runtime** (after object exists)                                   | During **algorithm traversal** (executed across multiple object types)              |
+| 🧩 **Extends**              | The **class prototype** or **object** directly              | A **single object instance**                                           | The **visitor (operation)**, not the objects themselves                             |
+| 🧰 **How It Works**         | Merge additional methods/properties into the class          | Wrap the object with another object that implements the same interface | Each object accepts a visitor and lets it perform logic specific to that type       |
+| 🔄 **Direction of Control** | Class → gains new abilities                                 | Wrapper → intercepts calls                                             | Visitor → controls what happens to each object                                      |
+| 🔗 **Typical Use**          | Utilities or shared mix behaviors (e.g. logging, events)    | Runtime features (logging, caching, styling)                           | Multi-type operations (AST traversal, report generation)                            |
+
+💡 Example Comparison
+🧬 Mixin
+const LoggerMixin = {
+  log(msg) {
+    console.log(`[LOG]: ${msg}`);
+  }
+};
+
+class User {}
+Object.assign(User.prototype, LoggerMixin);
+
+const u = new User();
+u.log("User created");
+
+
+✅ Adds behavior to the class itself, reusable everywhere.
+
+🎁 Decorator
+class User {
+  save() { console.log("User saved"); }
+}
+
+function withLogger(user) {
+  const original = user.save;
+  user.save = function() {
+    console.log("Before saving");
+    original.call(this);
+    console.log("After saving");
+  };
+  return user;
+}
+
+const user = withLogger(new User());
+user.save();
+
+
+✅ Wraps one object instance, dynamically modifying its behavior.
+
+🧭 Visitor
+class User {
+  accept(visitor) { visitor.visitUser(this); }
+}
+
+class Admin {
+  accept(visitor) { visitor.visitAdmin(this); }
+}
+
+class ReportVisitor {
+  visitUser(user) { console.log("Generating report for User"); }
+  visitAdmin(admin) { console.log("Generating report for Admin"); }
+}
+
+const users = [new User(), new Admin()];
+const report = new ReportVisitor();
+users.forEach(u => u.accept(report));
+
+
+✅ Adds a new operation (report generation) without modifying any of the classes.
+
+| 🧩 Pattern    | Adds Behavior To                 | When                     | How                                      | Use Case                                                  |
+| ------------- | -------------------------------- | ------------------------ | ---------------------------------------- | --------------------------------------------------------- |
+| **Mixin**     | Class definition (all instances) | Compile/definition time  | Copy methods into prototype              | Share logic across many classes                           |
+| **Decorator** | A specific object                | Runtime                  | Wrap object, override methods            | Add logging, validation, caching dynamically              |
+| **Visitor**   | External operation logic         | Runtime (but structural) | Double dispatch (object accepts visitor) | Apply operations to different types without changing them |
+
+| Pattern       | Analogy                                                                                   |
+| ------------- | ----------------------------------------------------------------------------------------- |
+| **Mixin**     | Teaching everyone in the company a new skill (shared methods).                            |
+| **Decorator** | Giving *one person* a new outfit or accessory (enhanced behavior temporarily).            |
+| **Visitor**   | Hiring an auditor who visits everyone and performs a checkup (new operation across many). |
+
+⚡ In short
+👉 Mixin — “copy methods into a class”
+👉 Decorator — “wrap an object to extend behavior”
+👉 Visitor — “separate new operations from data structures”
+
+
+-----------------------------------------------
+
+🧩 1️⃣ Mixin Pattern
+
+👉 Purpose: Share reusable behavior between unrelated classes.
+👉 How: Copy or compose methods into another class (like a trait or helper).
+👉 When to use: You want multiple classes to share logic (not inheritance).
+
+Example:
+
+const Flyable = {
+  fly() { console.log(`${this.name} is flying 🕊️`) }
+}
+
+const Swimmable = {
+  swim() { console.log(`${this.name} is swimming 🐠`) }
+}
+
+class Duck {
+  constructor(name) { this.name = name }
+}
+
+Object.assign(Duck.prototype, Flyable, Swimmable)
+
+const d = new Duck("Donald")
+d.fly()
+d.swim()
+
+
+✅ Adds capabilities to a class.
+❌ Doesn’t wrap or visit — it merges methods directly.
+
+👉 Think: “Add reusable skills.”
+
+🧩 2️⃣ Decorator Pattern
+
+👉 Purpose: Dynamically add or modify behavior around an existing object.
+👉 How: Wrap an object with another that adds extra logic before or after calling it.
+👉 When to use: You want to extend an object’s functionality without modifying its class.
+
+Example:
+
+class Coffee {
+  cost() { return 5 }
+}
+
+class MilkDecorator {
+  constructor(coffee) { this.coffee = coffee }
+  cost() { return this.coffee.cost() + 2 }
+}
+
+class SugarDecorator {
+  constructor(coffee) { this.coffee = coffee }
+  cost() { return this.coffee.cost() + 1 }
+}
+
+let coffee = new Coffee()
+coffee = new MilkDecorator(coffee)
+coffee = new SugarDecorator(coffee)
+console.log(coffee.cost()) // 8
+
+
+✅ Wraps objects dynamically.
+❌ Doesn’t change the class structure.
+
+👉 Think: “Wrap the object to extend behavior dynamically.”
+
+🧩 3️⃣ Visitor Pattern
+
+👉 Purpose: Add new operations on existing objects without modifying them.
+👉 How: Define a Visitor that “visits” different object types and performs an operation on each.
+👉 When to use: You have many different object types and need to run new operations on them.
+
+Example:
+
+class Circle {
+  accept(visitor) { visitor.visitCircle(this) }
+}
+class Rectangle {
+  accept(visitor) { visitor.visitRectangle(this) }
+}
+class AreaVisitor {
+  visitCircle() { console.log("🟢 Area of circle") }
+  visitRectangle() { console.log("🟦 Area of rectangle") }
+}
+
+const shapes = [new Circle(), new Rectangle()]
+const visitor = new AreaVisitor()
+shapes.forEach(shape => shape.accept(visitor))
+
+
+✅ Adds new operations without touching the shape classes.
+❌ Requires all classes to implement accept(visitor).
+
+👉 Think: “Add new operations externally.”
+
+| Feature                      | **Mixin**                          | **Decorator**                    | **Visitor**                             |
+| ---------------------------- | ---------------------------------- | -------------------------------- | --------------------------------------- |
+| **Goal**                     | Share behavior                     | Dynamically extend functionality | Add new operations to many object types |
+| **How it works**             | Copies/reuses methods              | Wraps object                     | External visitor acts on many classes   |
+| **When to use**              | Code reuse                         | Modify behavior dynamically      | Extend operations on existing structure |
+| **Affects original object?** | Yes (adds methods)                 | No (wraps)                       | No (external logic)                     |
+| **Pattern type**             | Structural / Reuse                 | Structural                       | Behavioral                              |
+| **Analogy**                  | Adding “skills”                    | Wrapping with new features       | Visitor inspecting multiple houses      |
+| **Example**                  | Add `loggable` to multiple classes | Add `milk` to coffee             | Compute area for shapes                 |
+
+
+*/
+
+
+
+
+/* 
+
+
+🧩 Definition
+
+The Interpreter Pattern defines a way to evaluate sentences or expressions in a language by representing grammar rules as classes.
+Each rule in the grammar is implemented as a class with an interpret() method.
+
+“Represent a language’s grammar as objects — and interpret sentences of that language.”
+
+🧠 Real-world Analogy
+
+Think of a translator (interpreter) 🗣️ who understands sentences in a specific grammar:
+Each sentence (expression) follows certain rules.
+The interpreter knows how to break it down and understand it.
+
+⚙️ Key Points
+
+👉 Represent grammar rules as a class hierarchy of expressions.
+👉 Each expression implements an interpret(context) method.
+👉 Combine expressions to form sentences that can be interpreted.
+
+🧠 Key Ideas
+
+👉 Define a mini-language or DSL (domain-specific language)
+👉 Each grammar rule (terminal or non-terminal) becomes a class
+👉 Build an abstract syntax tree (AST) from these objects
+👉 The interpret() method recursively evaluates the expression
+
+💡 Examples
+Example 1 — Simple Math Expression ➕➖
+class NumberExpression {
+  constructor(value) {
+    this.value = value;
+  }
+  interpret() {
+    return this.value;
+  }
+}
+
+class AddExpression {
+  constructor(left, right) {
+    this.left = left;
+    this.right = right;
+  }
+  interpret() {
+    return this.left.interpret() + this.right.interpret();
+  }
+}
+
+class SubtractExpression {
+  constructor(left, right) {
+    this.left = left;
+    this.right = right;
+  }
+  interpret() {
+    return this.left.interpret() - this.right.interpret();
+  }
+}
+
+// Expression: (5 + 3) - 2
+const expression = new SubtractExpression(
+  new AddExpression(new NumberExpression(5), new NumberExpression(3)),
+  new NumberExpression(2)
+);
+
+console.log(expression.interpret()); // 6
+
+
+✅ Each operation (add, subtract, number) is an object — together they form a tree that can be evaluated recursively.
+
+Example 2 — Boolean Expression 🧠
+class Variable {
+  constructor(name) {
+    this.name = name;
+  }
+  interpret(context) {
+    return context[this.name];
+  }
+}
+
+class AndExpression {
+  constructor(left, right) {
+    this.left = left;
+    this.right = right;
+  }
+  interpret(context) {
+    return this.left.interpret(context) && this.right.interpret(context);
+  }
+}
+
+class OrExpression {
+  constructor(left, right) {
+    this.left = left;
+    this.right = right;
+  }
+  interpret(context) {
+    return this.left.interpret(context) || this.right.interpret(context);
+  }
+}
+
+// Expression: (A AND B) OR C
+const expression = new OrExpression(
+  new AndExpression(new Variable("A"), new Variable("B")),
+  new Variable("C")
+);
+
+const context = { A: true, B: false, C: true };
+console.log(expression.interpret(context)); // true
+
+
+✅ You can change the context at runtime to interpret the same expression differently.
+
+Example 3 — Mini Command Language 💬
+class PrintCommand {
+  constructor(text) {
+    this.text = text;
+  }
+  interpret() {
+    console.log(this.text);
+  }
+}
+
+class RepeatCommand {
+  constructor(times, command) {
+    this.times = times;
+    this.command = command;
+  }
+  interpret() {
+    for (let i = 0; i < this.times; i++) {
+      this.command.interpret();
+    }
+  }
+}
+
+// "repeat 3 print 'Hi'"
+const script = new RepeatCommand(3, new PrintCommand("Hi"));
+script.interpret();
+// Output: Hi Hi Hi
+
+
+✅ Each command acts like a “word” in a small scripting language — interpreted at runtime.
+
+--------------------------------------------------------------------------------------------
+
+🧩 Example 1 — Basic JavaScript Example
+
+Imagine a simple grammar for interpreting logical expressions like:
+
+"John AND Admin"
+"Guest OR Admin"
+
+// Context
+class Context {
+  constructor() {
+    this.data = {}
+  }
+
+  assign(variable, value) {
+    this.data[variable] = value
+  }
+
+  lookup(variable) {
+    return this.data[variable]
+  }
+}
+
+// Abstract Expression
+class Expression {
+  interpret(context) {}
+}
+
+// Terminal Expression
+class VariableExpression extends Expression {
+  constructor(name) {
+    super()
+    this.name = name
+  }
+
+  interpret(context) {
+    return context.lookup(this.name)
+  }
+}
+
+// Non-Terminal Expressions
+class AndExpression extends Expression {
+  constructor(left, right) {
+    super()
+    this.left = left
+    this.right = right
+  }
+
+  interpret(context) {
+    return this.left.interpret(context) && this.right.interpret(context)
+  }
+}
+
+class OrExpression extends Expression {
+  constructor(left, right) {
+    super()
+    this.left = left
+    this.right = right
+  }
+
+  interpret(context) {
+    return this.left.interpret(context) || this.right.interpret(context)
+  }
+}
+
+// Usage
+const context = new Context()
+context.assign("John", true)
+context.assign("Admin", false)
+context.assign("Guest", true)
+
+const expr1 = new AndExpression(
+  new VariableExpression("John"),
+  new VariableExpression("Admin")
+)
+
+const expr2 = new OrExpression(
+  new VariableExpression("Guest"),
+  new VariableExpression("Admin")
+)
+
+console.log("John AND Admin =", expr1.interpret(context)) // false
+console.log("Guest OR Admin =", expr2.interpret(context)) // true
+
+
+✅ The grammar (AND, OR, variables) is represented by objects.
+✅ You can easily extend it (e.g., add NOTExpression).
+
+🧩 Example 3 — React / Node Real-World Use Case: Filter Rules Interpreter
+
+Let’s say you have dynamic filters like:
+
+(age > 18 AND city == "Cairo") OR isAdmin
+
+
+You can build a mini “query language” interpreter for them.
+
+class Context {
+  constructor(data) {
+    this.data = data
+  }
+
+  get(variable) {
+    return this.data[variable]
+  }
+}
+
+class EqualsExpression {
+  constructor(variable, value) {
+    this.variable = variable
+    this.value = value
+  }
+
+  interpret(context) {
+    return context.get(this.variable) === this.value
+  }
+}
+
+class GreaterThanExpression {
+  constructor(variable, value) {
+    this.variable = variable
+    this.value = value
+  }
+
+  interpret(context) {
+    return context.get(this.variable) > this.value
+  }
+}
+
+class OrExpression {
+  constructor(left, right) {
+    this.left = left
+    this.right = right
+  }
+
+  interpret(context) {
+    return this.left.interpret(context) || this.right.interpret(context)
+  }
+}
+
+class AndExpression {
+  constructor(left, right) {
+    this.left = left
+    this.right = right
+  }
+
+  interpret(context) {
+    return this.left.interpret(context) && this.right.interpret(context)
+  }
+}
+
+// Expression: (age > 18 AND city == "Cairo") OR isAdmin
+const expr = new OrExpression(
+  new AndExpression(
+    new GreaterThanExpression("age", 18),
+    new EqualsExpression("city", "Cairo")
+  ),
+  new EqualsExpression("isAdmin", true)
+)
+
+const user1 = new Context({ age: 25, city: "Cairo", isAdmin: false })
+const user2 = new Context({ age: 16, city: "Giza", isAdmin: true })
+const user3 = new Context({ age: 17, city: "Cairo", isAdmin: false })
+
+console.log(expr.interpret(user1)) // true
+console.log(expr.interpret(user2)) // true
+console.log(expr.interpret(user3)) // false
+
+
+✅ This is how query builders, filters, or rules engines are implemented.
+
+⚙️ Use Cases
+
+👉 Parsing or evaluating expressions (math, logic, filters)
+👉 Implementing DSLs (domain-specific languages)
+👉 Building rule engines or configuration parsers
+👉 Compilers or interpreters (AST traversal)
+👉 Workflow or scripting engines
+| Use Case                       | Example                                            |
+| ------------------------------ | -------------------------------------------------- |
+| **Rule engines**               | e.g., evaluate `(age > 18 AND status == 'active')` |
+| **Search / filters**           | Parse and interpret user filter strings            |
+| **Math expression evaluators** | Evaluate dynamic equations                         |
+| **Compilers / interpreters**   | Parse programming languages (AST evaluation)       |
+| **Workflow engines**           | Interpret business logic rules                     |
+
+
+✅ Benefits
+
+👉 Makes grammar and rules explicit and extensible
+👉 Easy to add new expressions or operations
+👉 Each expression is independent and reusable
+👉 Mirrors how parsers and compilers are structured
+👉 Add new grammar rules easily.
+👉 Clean separation between structure (grammar) and logic (evaluation).
+👉 Great for parsing expressions and DSLs (domain-specific languages).
+
+⚠️ Cons
+
+👉 Becomes complex for large grammars (many small classes)
+👉 Can be slower due to deep recursion
+👉 Not ideal for full programming languages (use parser generators instead)
+
+📘 Takeaways
+
+👉 Interpreter = object-based language grammar
+👉 Each rule = class with interpret()
+👉 You build a tree of expressions, and evaluate it recursively
+👉 Great for small custom languages, query builders, or rule systems
+
+💡 Think of it like:
+
+“A translator who knows how to interpret every word in your custom language — one rule at a time.”
+
+🧠 Summary
+
+👉 Interpreter Pattern = represent and evaluate sentences or rules in a language.
+👉 Each grammar element is an object implementing interpret(context).
+👉 Common in rule engines, query filters, math evaluators, and DSLs.
+👉 Forms the basis of compilers and parsers.
+
 
 */
