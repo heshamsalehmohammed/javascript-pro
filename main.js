@@ -68,7 +68,8 @@ It promotes modularity, reusability, and clarity by modeling programs closer to 
 Four Main Pillars of OOP
 1. Encapsulation
 
-Encapsulation is about bundling data and methods that operate on that data into one unit (the object), while restricting direct external access to the internal state. Only the necessary details are exposed through controlled interfaces.
+Encapsulation is about bundling data and methods that operate on that data into one unit (the object), 
+while restricting direct external access to the internal state. Only the necessary details are exposed through controlled interfaces.
 
 JavaScript Example:
 
@@ -219,7 +220,7 @@ console.log(c.area()); // 78.5398...
 
 👉 Short Interview-Ready Definition
 
-OOP is a declarative paradigm where programs are structured around objects that encapsulate state and behavior, 
+OOP is a imperative paradigm where programs are structured around objects that encapsulate state and behavior, 
 following the four principles: encapsulation, inheritance, polymorphism, and abstraction.
 
 
@@ -1608,7 +1609,9 @@ PROMISES
 👉 Promises are the modern way to handle asynchronous operations
 👉 A Promise is an object that represents the eventual result of an asynchronous operation
 👉 it acts like a placeholder for a value that will be available later (success or failure)
+
 👉 [[one time guarantee for a future value]]
+
 👉 it can be in one of three states
     pending → the async work has not finished yet
     fulfilled → the work finished successfully, a value is available
